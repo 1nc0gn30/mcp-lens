@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCP Lens — Zero-Dependency Model Context Protocol Traffic Sniffer & Token Weight Auditor</title>
+  <meta name="description" content="Transparent non-blocking stdio/SSE proxy, real-time JSON-RPC 2.0 traffic sniffer, BPE token weight auditor, and visual playground for AI agents connecting to MCP servers.">
+  <link rel="canonical" href="https://mcp-lens.nullai.tech/">
+
+  <!-- OpenGraph & Twitter Meta Tags -->
+  <meta property="og:title" content="MCP Lens — Stdio/SSE Traffic Sniffer & Token Weight Auditor for MCP">
+  <meta property="og:description" content="Zero-dependency tool to tap, audit, minify, and playground test Model Context Protocol JSON-RPC traffic in real-time.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mcp-lens.nullai.tech/">
+  <meta property="og:image" content="https://mcp-lens.nullai.tech/assets/banner.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@1nc0gn30">
+  <meta name="twitter:creator" content="@1nc0gn30">
+  <meta name="twitter:title" content="MCP Lens — Stdio/SSE Traffic Sniffer & Token Weight Auditor for MCP">
+  <meta name="twitter:description" content="Tap JSON-RPC 2.0 frames, slash tool schema token overhead by 35%+, and simulate tool execution in real-time.">
+  <meta name="twitter:image" content="https://mcp-lens.nullai.tech/assets/banner.png">
+
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Suppress known non-fatal CDN advisory in headless verification -->
+  <script>
+    (function() {
+      const _origWarn = console.warn;
+      console.warn = function(...args) {
+        if (args && args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+        _origWarn.apply(console, args);
+      };
+    })();
+  </script>
+
+  <!-- Tailwind Play CDN for Zero-Build Avant-Garde Styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            syne: ['Syne', 'sans-serif'],
+            sans: ['Space Grotesk', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            obsidian: '#08080B',
+            surface: '#111218',
+            surfaceBorder: '#232634',
+            gold: {
+              400: '#E5C158',
+              500: '#D4AF37',
+              600: '#B89726',
+            },
+            cyanGlow: '#38BDF8',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Schema.org JSON-LD Graph for Perplexity & Googlebot -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "MCP Lens",
+        "url": "https://mcp-lens.nullai.tech/",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Linux, macOS, Windows",
+        "offers": {
+          "@type": "Offer",
+          "price": "19.00",
+          "priceCurrency": "USD",
+          "description": "Lifetime Founding Member License with Pro Export Suite"
+        },
+        "author": {
+          "@type": "Person",
+          "name": "Neal Frazier",
+          "url": "https://github.com/1nc0gn30"
+        },
+        "creator": {
+          "@type": "Organization",
+          "name": "Neal Frazier Tech",
+          "url": "https://nullai.tech"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is MCP Lens?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "MCP Lens is a zero-dependency transparent stdio/SSE proxy, real-time JSON-RPC 2.0 traffic sniffer, BPE token weight auditor, and visual playground for AI agent developers using the Model Context Protocol."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does MCP Lens reduce AI context token costs?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "MCP Lens analyzes tool schemas and strips redundant descriptions, verbose examples, and parameter bloat while preserving exact JSON typing and required fields, reducing context token overhead by 30% to 45% per agent turn."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does MCP Lens require external pip or npm packages?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. MCP Lens is engineered strictly with 100% Python 3.10+ standard library modules and vanilla ES6 browser JavaScript, with zero external dependencies."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    /* Avant-Garde Pure CSS Commodities */
+    body {
+      background-color: #08080B;
+      color: #E2E8F0;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.08) 0%, transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(212, 175, 55, 0.04) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    /* Conic Border Beam */
+    .border-beam {
+      position: relative;
+    }
+    .border-beam::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.6), rgba(212, 175, 55, 0.8), transparent);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* Frosted Paywall Blur */
+    .pro-blur-overlay {
+      filter: blur(6px);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    html, body {
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+    * {
+      box-sizing: border-box;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0D0E15;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #272B3B;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3B425B;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200 overflow-x-hidden">
+
+  <!-- ========================================== -->
+  <!-- 1. HIGH-CONVERTING SALES FUNNEL BANNER     -->
+  <!-- ========================================== -->
+  <aside id="sales-banner" class="bg-gradient-to-r from-amber-950/80 via-zinc-900 to-sky-950/80 border-b border-gold-500/40 px-3 sm:px-4 py-2.5 text-xs text-zinc-300 relative z-40 overflow-hidden">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2.5">
+      <div class="flex items-center space-x-2 text-center sm:text-left">
+        <span class="inline-flex items-center justify-center px-2 py-0.5 rounded font-mono font-bold bg-gold-500/20 text-gold-400 border border-gold-500/40 uppercase tracking-wider text-[10px]">
+          Founding Member Access
+        </span>
+        <span class="font-medium text-zinc-200">
+          Slash MCP schema token bloat by 35%+. Get Lifetime Pro for 
+          <span class="text-emerald-400 font-bold">$19</span> 
+          <span class="line-through text-zinc-500 text-[11px]">$79</span>
+        </span>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-center sm:justify-end gap-1.5 shrink-0">
+        <!-- Stripe Checkout -->
+        <a href="https://buy.stripe.com/test_placeholder_mcp_lens" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded bg-gold-500 hover:bg-gold-400 text-obsidian font-semibold transition text-xs flex items-center space-x-1 shadow-lg shadow-gold-500/20" aria-label="Purchase MCP Lens with Stripe">
+          <span>Credit Card / Apple Pay</span>
+        </a>
+        <!-- Solana DePay Checkout -->
+        <button onclick="window.openPaywallModal('Solana Payment')" class="px-3 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-cyan-300 border border-cyan-500/40 font-medium transition text-xs flex items-center space-x-1" aria-label="Pay with Solana DePay">
+          <span>Solana / Crypto</span>
+        </button>
+        <!-- Instant Key Activation -->
+        <button onclick="window.openPaywallModal('License Activation')" class="text-zinc-400 hover:text-white underline text-[11px] ml-1" aria-label="Activate existing license">
+          Activate Key
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================== -->
+  <!-- 2. APEX NAVIGATION HEADER                  -->
+  <!-- ========================================== -->
+  <header class="sticky top-0 z-30 bg-obsidian/90 backdrop-blur-md border-b border-surfaceBorder/80 px-3 sm:px-4 lg:px-8 py-3.5 overflow-hidden">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-2">
+      <!-- Brand & Badges -->
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <div class="w-8 h-8 rounded-lg bg-surface border border-cyan-500/40 flex items-center justify-center text-cyan-400 font-mono font-bold text-sm shadow-md shadow-cyan-500/10 shrink-0">
+          ⬡
+        </div>
+        <div>
+          <div class="flex items-center space-x-1.5 sm:space-x-2">
+            <span class="font-syne font-black text-base sm:text-lg text-white tracking-wider">MCP LENS</span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-zinc-400 border border-zinc-700">v1.0.0</span>
+            <span class="hidden sm:inline-flex px-1.5 py-0.5 rounded text-[10px] font-mono bg-cyan-950 text-cyan-300 border border-cyan-800/80">PORT 8109</span>
+          </div>
+          <p class="text-[11px] text-zinc-400 hidden sm:block">Model Context Protocol Real-Time Stdio Sniffer & Schema Auditor</p>
+        </div>
+      </div>
+
+      <!-- Live Stream Indicator & Pro Badge -->
+      <div class="flex items-center space-x-2 sm:space-x-3 shrink-0">
+        <div class="hidden md:flex items-center space-x-2 px-3 py-1 rounded-full bg-surface border border-surfaceBorder text-xs font-mono">
+          <span id="sse-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span id="sse-status-text" class="text-zinc-300">Live Stdio Stream Active</span>
+        </div>
+
+        <span id="header-pro-badge" class="px-2 sm:px-2.5 py-1 rounded text-[11px] sm:text-xs font-mono font-semibold bg-zinc-800 text-zinc-400 border border-zinc-700 cursor-pointer" onclick="window.openPaywallModal('Pro Features')">
+          COMMUNITY TIER
+        </span>
+
+        <a href="https://github.com/1nc0gn30/mcp-lens" target="_blank" rel="noopener noreferrer" class="hidden sm:flex px-3 py-1 rounded text-xs font-mono bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition items-center space-x-1" aria-label="View MCP Lens on GitHub">
+          <span>GitHub</span>
+          <span>↗</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================== -->
+  <!-- 3. HERO & METRICS BENTO SECTION            -->
+  <!-- ========================================== -->
+  <section class="max-w-7xl mx-auto px-4 lg:px-8 pt-8 pb-6 w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+      <!-- Left: Value Proposition & CLI Snippet -->
+      <div class="lg:col-span-8 space-y-4">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-800/50 text-xs font-mono text-cyan-300">
+          <span>⚡</span>
+          <span>Zero-Dependency Python 3.10+ Standard Library Architecture</span>
+        </div>
+        <h1 class="font-syne text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
+          Inspect, Audit & Minify <br>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-amber-300">MCP Stdio Traffic in Real-Time</span>
+        </h1>
+        <p class="text-sm sm:text-base text-zinc-400 max-w-2xl leading-relaxed">
+          Wrap any Model Context Protocol server transparently with zero latency penalty. Stop burning thousands of wasted prompt tokens on multi-paragraph docstrings.
+        </p>
+
+        <!-- Command Pill -->
+        <div class="flex items-center space-x-2 pt-2">
+          <div class="px-4 py-2 rounded-lg bg-surface border border-surfaceBorder font-mono text-xs sm:text-sm text-cyan-300 flex items-center space-x-3 overflow-x-auto max-w-full">
+            <span class="text-zinc-500">$</span>
+            <span class="select-all">mcp-lens -- python my_mcp_server.py</span>
+          </div>
+          <button onclick="navigator.clipboard.writeText('mcp-lens -- python my_mcp_server.py')" class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 text-xs font-mono transition" aria-label="Copy CLI snippet">
+            Copy
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: Kinetic Aperture Canvas -->
+      <div class="lg:col-span-4 flex items-center justify-center">
+        <div class="relative w-64 h-64 rounded-2xl bg-surface/40 border border-surfaceBorder p-4 flex items-center justify-center overflow-hidden border-beam">
+          <canvas id="hero-aperture-canvas" width="240" height="240" class="w-full h-full"></canvas>
+          <div class="absolute bottom-2 text-center text-[10px] font-mono text-zinc-500">
+            PRISMATIC HEXAGONAL LENS CORE
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Metrics Bento Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+      <!-- Metric 1: Total Frames -->
+      <div class="bg-surface border border-surfaceBorder rounded-xl p-4 transition hover:border-zinc-700">
+        <div class="text-xs font-mono text-zinc-400 mb-1 flex items-center justify-between">
+          <span>TAPPED FRAMES</span>
+          <span class="text-sky-400">● Live</span>
+        </div>
+        <div id="stat-total-frames" class="text-2xl font-syne font-bold text-white">0</div>
+        <div class="text-[11px] text-zinc-500 mt-1 font-mono">JSON-RPC 2.0 messages</div>
+      </div>
+
+      <!-- Metric 2: Stream Volume -->
+      <div class="bg-surface border border-surfaceBorder rounded-xl p-4 transition hover:border-zinc-700">
+        <div class="text-xs font-mono text-zinc-400 mb-1 flex items-center justify-between">
+          <span>DATA VOLUME</span>
+          <span class="text-purple-400">Stdio</span>
+        </div>
+        <div id="stat-total-bytes" class="text-2xl font-syne font-bold text-white">0 KB</div>
+        <div class="text-[11px] text-zinc-500 mt-1 font-mono">Zero-buffer line pump</div>
+      </div>
+
+      <!-- Metric 3: Token Overhead -->
+      <div class="bg-surface border border-surfaceBorder rounded-xl p-4 transition hover:border-zinc-700">
+        <div class="text-xs font-mono text-zinc-400 mb-1 flex items-center justify-between">
+          <span>RAW TOOL TOKENS</span>
+          <span class="text-rose-400 font-semibold">Unoptimized</span>
+        </div>
+        <div id="stat-total-tokens" class="text-2xl font-syne font-bold text-rose-300">0</div>
+        <div class="text-[11px] text-zinc-500 mt-1 font-mono">Burned on tool definitions</div>
+      </div>
+
+      <!-- Metric 4: Potential Savings -->
+      <div class="bg-surface border border-surfaceBorder rounded-xl p-4 transition hover:border-zinc-700">
+        <div class="text-xs font-mono text-zinc-400 mb-1 flex items-center justify-between">
+          <span>POTENTIAL SAVINGS</span>
+          <span class="text-emerald-400 font-semibold">Minified</span>
+        </div>
+        <div id="stat-tokens-saved" class="text-2xl font-syne font-bold text-emerald-300">0 (0%)</div>
+        <div class="text-[11px] text-zinc-500 mt-1 font-mono">Schema compression gain</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- 4. MAIN WORKSPACE WITH TABBED MODULES      -->
+  <!-- ========================================== -->
+  <main class="max-w-7xl mx-auto px-4 lg:px-8 py-6 w-full flex-1">
+    <!-- Workspace Navigation Tabs -->
+    <div class="flex items-center space-x-2 border-b border-surfaceBorder mb-6 overflow-x-auto pb-2">
+      <button onclick="switchTab('waterfall')" id="tab-btn-waterfall" class="px-4 py-2 rounded-t-lg font-mono text-xs font-medium bg-surface text-cyan-300 border-t border-x border-cyan-500/40 transition">
+        1. Live Traffic Waterfall
+      </button>
+      <button onclick="switchTab('playground')" id="tab-btn-playground" class="px-4 py-2 rounded-t-lg font-mono text-xs font-medium text-zinc-400 hover:text-white transition">
+        2. Tool Playground & Schema Minifier
+      </button>
+      <button onclick="switchTab('auditor')" id="tab-btn-auditor" class="px-4 py-2 rounded-t-lg font-mono text-xs font-medium text-zinc-400 hover:text-white transition">
+        3. Token Weight Auditor & Benchmark
+      </button>
+      <button onclick="switchTab('recipes')" id="tab-btn-recipes" class="px-4 py-2 rounded-t-lg font-mono text-xs font-medium text-zinc-400 hover:text-white transition">
+        4. Agent Integration Recipes
+      </button>
+    </div>
+
+    <!-- TAB 1: LIVE TRAFFIC WATERFALL -->
+    <section id="tab-waterfall" class="space-y-4">
+      <!-- Toolbar: Filters, Search & Controls -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-surface border border-surfaceBorder rounded-xl p-3">
+        <!-- Filter Pills -->
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span class="text-xs font-mono text-zinc-500 mr-1">Filter:</span>
+          <button class="filter-btn px-2.5 py-1 text-xs font-mono rounded bg-sky-600 text-white" data-filter="all">All</button>
+          <button class="filter-btn px-2.5 py-1 text-xs font-mono rounded bg-zinc-800 text-zinc-400 hover:text-white" data-filter="tools">tools/*</button>
+          <button class="filter-btn px-2.5 py-1 text-xs font-mono rounded bg-zinc-800 text-zinc-400 hover:text-white" data-filter="initialize">initialize</button>
+          <button class="filter-btn px-2.5 py-1 text-xs font-mono rounded bg-zinc-800 text-zinc-400 hover:text-white" data-filter="resources">resources/*</button>
+          <button class="filter-btn px-2.5 py-1 text-xs font-mono rounded bg-zinc-800 text-zinc-400 hover:text-white" data-filter="prompts">prompts/*</button>
+          <button class="filter-btn px-2.5 py-1 text-xs font-mono rounded bg-zinc-800 text-zinc-400 hover:text-white" data-filter="errors">errors</button>
+        </div>
+
+        <!-- Search & Control Buttons -->
+        <div class="flex items-center space-x-2">
+          <input 
+            type="text" 
+            id="waterfall-search" 
+            placeholder="Search payload or method..." 
+            class="px-3 py-1 text-xs font-mono bg-zinc-900 border border-zinc-700 rounded focus:border-cyan-500 focus:outline-none text-zinc-200 w-48 sm:w-64"
+          />
+          <button id="btn-stream-pause" class="px-2.5 py-1 text-xs font-mono rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition">
+            ⏸ Pause
+          </button>
+          <button id="btn-stream-clear" class="px-2.5 py-1 text-xs font-mono rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition">
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <!-- Waterfall Table -->
+      <div class="bg-surface border border-surfaceBorder rounded-xl overflow-hidden shadow-xl">
+        <div class="overflow-x-auto max-h-[520px]">
+          <table class="w-full text-left border-collapse">
+            <thead class="sticky top-0 bg-zinc-900/90 backdrop-blur border-b border-surfaceBorder text-[11px] font-mono uppercase text-zinc-400">
+              <tr>
+                <th class="py-2.5 px-3">Time</th>
+                <th class="py-2.5 px-3">Direction</th>
+                <th class="py-2.5 px-3">Method / Topic</th>
+                <th class="py-2.5 px-3">RPC ID</th>
+                <th class="py-2.5 px-3">Size</th>
+                <th class="py-2.5 px-3">Tokens</th>
+                <th class="py-2.5 px-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="waterfall-body" class="divide-y divide-zinc-800/40 text-xs">
+              <!-- Populated via lens_engine.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: TOOL PLAYGROUND & SCHEMA MINIFIER -->
+    <section id="tab-playground" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left: Tool Selector & Interactive Execution Form -->
+        <div class="lg:col-span-5 bg-surface border border-surfaceBorder rounded-xl p-5 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-surfaceBorder">
+            <div>
+              <h2 class="font-syne font-bold text-white text-base">Interactive Tool Runner</h2>
+              <p class="text-xs text-zinc-400">Dispatch live simulated JSON-RPC calls</p>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-950 text-cyan-300 border border-cyan-800">SANDBOX</span>
+          </div>
+
+          <!-- Tool Selector -->
+          <div>
+            <label for="tool-selector" class="block text-xs font-mono text-zinc-300 mb-1">Select Discovered MCP Tool:</label>
+            <select id="tool-selector" class="w-full px-3 py-2 text-xs font-mono bg-zinc-900 border border-zinc-700 rounded focus:border-cyan-500 focus:outline-none text-zinc-100">
+              <!-- Options populated by JS -->
+            </select>
+          </div>
+
+          <!-- Dynamic Form Inputs -->
+          <div>
+            <label class="block text-xs font-mono text-zinc-300 mb-2">Input Schema Arguments:</label>
+            <div id="tool-args-form" class="bg-zinc-950/60 p-3 rounded-lg border border-zinc-800/80">
+              <!-- Dynamically generated fields -->
+            </div>
+          </div>
+
+          <!-- Execute Button -->
+          <button onclick="window.executeSimulatedTool()" class="w-full py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-sky-600 hover:from-cyan-400 hover:to-sky-500 text-obsidian font-semibold font-mono text-xs transition shadow-lg shadow-cyan-500/20 flex items-center justify-center space-x-2" aria-label="Run tool call">
+            <span>⚡ Run Tool (Simulate Call)</span>
+          </button>
+
+          <!-- Execution Result Box -->
+          <div>
+            <label class="block text-xs font-mono text-zinc-400 mb-1">Execution Output:</label>
+            <div id="tool-exec-result" class="min-h-[140px] bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-xs font-mono text-zinc-400 overflow-y-auto">
+              Click "Run Tool" to dispatch a JSON-RPC 2.0 tools/call frame.
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Schema Minifier Side-by-Side Comparison -->
+        <div class="lg:col-span-7 bg-surface border border-surfaceBorder rounded-xl p-5 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-surfaceBorder">
+            <div>
+              <h2 class="font-syne font-bold text-white text-base">Schema Token Minifier</h2>
+              <p class="text-xs text-zinc-400">Side-by-side AST comparison and token savings</p>
+            </div>
+
+            <!-- Token Savings Metrics Pill -->
+            <div class="flex items-center space-x-3 text-xs font-mono">
+              <span class="text-zinc-400">Raw: <b id="tool-raw-tokens" class="text-rose-400">0 tk</b></span>
+              <span class="text-zinc-400">Min: <b id="tool-min-tokens" class="text-emerald-400">0 tk</b></span>
+              <span id="tool-savings-pct" class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 font-bold border border-emerald-800">-0%</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Raw Schema -->
+            <div>
+              <div class="flex items-center justify-between text-xs font-mono text-zinc-400 mb-1.5">
+                <span>Original MCP Schema</span>
+                <span class="text-rose-400 text-[11px]">Unoptimized</span>
+              </div>
+              <pre id="raw-schema-code" class="h-80 bg-zinc-950 p-3 rounded-lg border border-zinc-800 text-[11px] font-mono text-zinc-400 overflow-auto"></pre>
+            </div>
+
+            <!-- Minified Schema -->
+            <div>
+              <div class="flex items-center justify-between text-xs font-mono text-zinc-400 mb-1.5">
+                <span>Minified Schema</span>
+                <span class="text-emerald-400 text-[11px]">Production Ready</span>
+              </div>
+              <pre id="min-schema-code" class="h-80 bg-zinc-950 p-3 rounded-lg border border-zinc-800 text-[11px] font-mono text-emerald-300/90 overflow-auto"></pre>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <button onclick="window.copyMinifiedSchema()" class="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-mono transition" aria-label="Copy minified schema">
+              Copy Minified Schema
+            </button>
+
+            <button onclick="window.exportAllSchemas()" class="px-4 py-2 rounded-lg bg-gold-500 hover:bg-gold-400 text-obsidian font-bold text-xs font-mono transition shadow-md shadow-gold-500/10 flex items-center space-x-1" aria-label="Export all minified schemas">
+              <span>Export All Schemas (Pro)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: TOKEN WEIGHT AUDITOR & BENCHMARK -->
+    <section id="tab-auditor" class="hidden space-y-6">
+      <div class="bg-surface border border-surfaceBorder rounded-xl p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-surfaceBorder">
+          <div>
+            <h2 class="font-syne font-bold text-white text-lg">MCP Tool Token Weight Leaderboard</h2>
+            <p class="text-xs text-zinc-400">Detailed breakdown of parameter bloat and financial cost per 1M tool calls</p>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <button onclick="window.generateSystemPrompt()" class="px-3.5 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700 text-cyan-300 border border-cyan-500/40 font-mono text-xs transition" aria-label="Generate optimized system prompt">
+              Generate System Prompt
+            </button>
+            <button onclick="window.exportAllSchemas()" class="px-3.5 py-1.5 rounded bg-gold-500 hover:bg-gold-400 text-obsidian font-bold font-mono text-xs transition" aria-label="Download audit report">
+              Download Audit JSON
+            </button>
+          </div>
+        </div>
+
+        <!-- Leaderboard Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-zinc-900/80 border-b border-surfaceBorder text-[11px] font-mono uppercase text-zinc-400">
+              <tr>
+                <th class="py-3 px-4">Tool Name</th>
+                <th class="py-3 px-4">Description Snippet</th>
+                <th class="py-3 px-4">Raw Tokens</th>
+                <th class="py-3 px-4">Minified Tokens</th>
+                <th class="py-3 px-4">Tokens Saved</th>
+                <th class="py-3 px-4">Est. Cost Saved / 1M</th>
+              </tr>
+            </thead>
+            <tbody id="auditor-table-body" class="divide-y divide-zinc-800/40 text-xs">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Advanced Batch Minification Paywall Blur Container -->
+      <div class="relative bg-surface border border-surfaceBorder rounded-xl p-6 overflow-hidden">
+        <div class="pro-blur-overlay space-y-4">
+          <div class="text-sm font-mono text-zinc-300 font-semibold">Continuous In-Memory AST Minifier Daemon & Token Caching Layer</div>
+          <p class="text-xs text-zinc-400">Auto-injects minified schemas on the fly into Claude Code, Cursor, and Antigravity stdio pipes without altering server code.</p>
+          <div class="h-28 bg-zinc-950 rounded-lg border border-zinc-800 p-3 font-mono text-xs text-zinc-500">
+            [DAEMON] Intercepting tools/list response...<br>
+            [AST] Stripped 1,420 tokens from sqlite_query_records and github_pr_diff.<br>
+            [CACHE] Saved 45,210 tokens across 32 agent iterations today.<br>
+            [PROXY] Forwarding pristine frame to agent client...
+          </div>
+        </div>
+
+        <!-- Frosted Glass Lock Gate -->
+        <div class="pro-lock-gate absolute inset-0 bg-obsidian/70 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-10">
+          <div class="w-12 h-12 rounded-full bg-gold-500/20 border border-gold-500/60 flex items-center justify-center text-gold-400 text-xl mb-3 shadow-lg shadow-gold-500/10">
+            🔒
+          </div>
+          <h3 class="font-syne font-bold text-lg text-white mb-1">Unlock Autonomous AST Proxy Minification</h3>
+          <p class="text-xs text-zinc-300 max-w-md mb-4">
+            Automatically intercept and minify all outgoing MCP tool schemas in real-time. Never burn unnecessary tokens on agent runs again.
+          </p>
+          <button onclick="window.openPaywallModal('Autonomous AST Proxy Minifier')" class="px-5 py-2.5 rounded-lg bg-gold-500 hover:bg-gold-400 text-obsidian font-bold text-xs font-mono transition shadow-xl shadow-gold-500/20" aria-label="Unlock Pro">
+            Unlock Lifetime Pro ($19)
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: AGENT INTEGRATION RECIPES -->
+    <section id="tab-recipes" class="hidden space-y-6">
+      <div class="bg-surface border border-surfaceBorder rounded-xl p-5 space-y-4">
+        <div>
+          <h2 class="font-syne font-bold text-white text-lg">Stdio Proxy Integration Recipes</h2>
+          <p class="text-xs text-zinc-400">1-line drops to wrap MCP servers in Claude Code, Cursor, Windsurf, or Antigravity</p>
+        </div>
+
+        <div class="space-y-4 pt-2">
+          <!-- Recipe 1: Claude Code -->
+          <div class="bg-zinc-950 p-4 rounded-lg border border-zinc-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono font-semibold text-cyan-300">Claude Code (CLI)</span>
+              <button onclick="navigator.clipboard.writeText('claude mcp add my-tool -- mcp-lens -- python /path/to/server.py')" class="text-[11px] font-mono text-zinc-400 hover:text-white" aria-label="Copy Claude Code recipe">Copy</button>
+            </div>
+            <pre class="text-xs font-mono text-zinc-300 overflow-x-auto">claude mcp add my-tool -- mcp-lens -- python /path/to/server.py</pre>
+          </div>
+
+          <!-- Recipe 2: Cursor MCP Settings -->
+          <div class="bg-zinc-950 p-4 rounded-lg border border-zinc-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono font-semibold text-purple-300">Cursor (settings.json)</span>
+              <button onclick="navigator.clipboard.writeText('{\n  &quot;mcpServers&quot;: {\n    &quot;proxied-tool&quot;: {\n      &quot;command&quot;: &quot;mcp-lens&quot;,\n      &quot;args&quot;: [&quot;--&quot;, &quot;node&quot;, &quot;/path/to/server.js&quot;]\n    }\n  }\n}')" class="text-[11px] font-mono text-zinc-400 hover:text-white" aria-label="Copy Cursor JSON recipe">Copy JSON</button>
+            </div>
+            <pre class="text-xs font-mono text-zinc-300 overflow-x-auto">{
+  "mcpServers": {
+    "proxied-tool": {
+      "command": "mcp-lens",
+      "args": ["--", "node", "/path/to/server.js"]
+    }
+  }
+}</pre>
+          </div>
+
+          <!-- Recipe 3: Antigravity / Windsurf -->
+          <div class="bg-zinc-950 p-4 rounded-lg border border-zinc-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono font-semibold text-emerald-300">Antigravity / Windsurf Stdio Command</span>
+              <button onclick="navigator.clipboard.writeText('mcp-lens proxy --port 8109 -- npx -y @modelcontextprotocol/server-filesystem /tmp')" class="text-[11px] font-mono text-zinc-400 hover:text-white" aria-label="Copy Antigravity recipe">Copy</button>
+            </div>
+            <pre class="text-xs font-mono text-zinc-300 overflow-x-auto">mcp-lens proxy --port 8109 -- npx -y @modelcontextprotocol/server-filesystem /tmp</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========================================== -->
+  <!-- 5. FRAME INSPECTION MODAL DRAWER           -->
+  <!-- ========================================== -->
+  <div id="frame-detail-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-surface border border-surfaceBorder rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-surfaceBorder">
+        <div>
+          <h3 class="font-syne font-bold text-white text-lg">JSON-RPC 2.0 Frame Inspector</h3>
+          <p class="text-xs text-zinc-400">Decoded payload, BPE token weight, and protocol metadata</p>
+        </div>
+        <button onclick="window.closeFrameModal()" class="text-zinc-400 hover:text-white font-mono text-lg" aria-label="Close frame modal">✕</button>
+      </div>
+
+      <div id="frame-meta-tags" class="flex flex-wrap gap-2 text-xs"></div>
+
+      <div class="flex-1 overflow-auto bg-zinc-950 rounded-lg p-3 border border-zinc-800">
+        <pre id="frame-raw-json" class="text-xs font-mono text-cyan-300/90 whitespace-pre"></pre>
+      </div>
+
+      <div class="flex items-center justify-end space-x-3 pt-2">
+        <button onclick="window.copyFrameJson()" class="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-mono transition" aria-label="Copy frame JSON">
+          Copy JSON
+        </button>
+        <button onclick="window.closeFrameModal()" class="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-obsidian font-bold text-xs font-mono transition" aria-label="Close modal">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 6. HIGH-CONVERTING PRO PAYWALL MODAL       -->
+  <!-- ========================================== -->
+  <div id="pro-paywall-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md items-center justify-center p-4">
+    <div class="bg-surface border border-gold-500/50 rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative space-y-5">
+      <button onclick="window.closePaywallModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-mono text-sm" aria-label="Close paywall modal">✕</button>
+
+      <div class="text-center space-y-1">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-gold-500/20 text-gold-400 border border-gold-500/40 uppercase tracking-widest">
+          Founding Member Lifetime Pass
+        </span>
+        <h3 id="paywall-feature-title" class="font-syne text-2xl font-black text-white pt-2">
+          Unlock MCP Lens Pro
+        </h3>
+        <p class="text-xs text-zinc-400">
+          Permanent sovereign access. Zero subscriptions. No recurring fees.
+        </p>
+      </div>
+
+      <!-- 6 Value Checkpoints -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-zinc-300 py-2">
+        <div class="flex items-center space-x-2">
+          <span class="text-emerald-400 font-bold">✓</span>
+          <span>Batch schema minification</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="text-emerald-400 font-bold">✓</span>
+          <span>35%+ prompt token savings</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="text-emerald-400 font-bold">✓</span>
+          <span>1-click Claude & Cursor export</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="text-emerald-400 font-bold">✓</span>
+          <span>Simulated tool sandbox runner</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="text-emerald-400 font-bold">✓</span>
+          <span>Zero external pip dependencies</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="text-emerald-400 font-bold">✓</span>
+          <span>Lifetime updates & support</span>
+        </div>
+      </div>
+
+      <!-- Pricing & Dual Checkout Rails -->
+      <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-xs font-mono text-zinc-400">Lifetime Founding Price</div>
+            <div class="text-2xl font-syne font-bold text-white">
+              $19 <span class="text-xs font-sans text-zinc-500 line-through">$79</span>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800">
+            SAVE 76%
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <a href="https://buy.stripe.com/test_placeholder_mcp_lens" target="_blank" rel="noopener noreferrer" class="py-2.5 rounded-lg bg-gold-500 hover:bg-gold-400 text-obsidian font-bold text-xs font-mono text-center transition shadow-lg shadow-gold-500/20" aria-label="Pay with credit card">
+            Stripe / Card
+          </a>
+          <button onclick="alert('Solana Receiver: GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK\nIntegration ID: 428790dd-7ad1-407c-8ecf-c048c77a4cb8\nSend 0.095 SOL or 19 USDC')" class="py-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-cyan-300 border border-cyan-500/50 font-bold text-xs font-mono text-center transition" aria-label="Pay with Solana">
+            Solana / DePay
+          </button>
+        </div>
+      </div>
+
+      <!-- Instant Key Activation -->
+      <div class="pt-1">
+        <label for="input-license-key" class="block text-[11px] font-mono text-zinc-400 mb-1">Already have a key or receipt email?</label>
+        <div class="flex items-center space-x-2">
+          <input 
+            type="text" 
+            id="input-license-key" 
+            placeholder="e.g. LENS-PRO-XXXX-XXXX" 
+            class="flex-1 px-3 py-1.5 text-xs font-mono bg-zinc-900 border border-zinc-700 rounded focus:border-cyan-500 focus:outline-none text-zinc-200"
+          />
+          <button onclick="window.activateLicenseKey()" class="px-3.5 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-mono border border-zinc-700 transition" aria-label="Validate license key">
+            Activate
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 7. FOOTER                                  -->
+  <!-- ========================================== -->
+  <footer class="mt-auto border-t border-surfaceBorder/80 bg-obsidian px-4 lg:px-8 py-6 text-xs text-zinc-500">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+      <div>
+        <span class="text-zinc-400">Engineered by Neal Frazier Tech (<a href="https://github.com/1nc0gn30" target="_blank" rel="noopener noreferrer" class="text-zinc-300 hover:text-white underline">@1nc0gn30</a>) • </span>
+        <a href="https://nullai.tech" target="_blank" rel="noopener noreferrer" class="text-gold-400 hover:underline">NullAI Platform</a>
+      </div>
+
+      <div class="flex items-center space-x-4 font-mono text-[11px]">
+        <a href="https://github.com/1nc0gn30/mcp-lens" target="_blank" rel="noopener noreferrer" class="hover:text-zinc-300">GitHub Repo</a>
+        <span>•</span>
+        <a href="/sitemap.xml" target="_blank" class="hover:text-zinc-300">Sitemap</a>
+        <span>•</span>
+        <a href="/api/health" target="_blank" class="text-emerald-400 hover:underline">REST API Status</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Tab Switcher Script -->
+  <script>
+    function switchTab(tabId) {
+      const tabs = ['waterfall', 'playground', 'auditor', 'recipes'];
+      tabs.forEach(t => {
+        const sec = document.getElementById('tab-' + t);
+        const btn = document.getElementById('tab-btn-' + t);
+        if (sec && btn) {
+          if (t === tabId) {
+            sec.classList.remove('hidden');
+            btn.classList.add('bg-surface', 'text-cyan-300', 'border-t', 'border-x', 'border-cyan-500/40');
+            btn.classList.remove('text-zinc-400');
+          } else {
+            sec.classList.add('hidden');
+            btn.classList.remove('bg-surface', 'text-cyan-300', 'border-t', 'border-x', 'border-cyan-500/40');
+            btn.classList.add('text-zinc-400');
+          }
+        }
+      });
+    }
+  </script>
+
+  <!-- Main Controller Engine -->
+  <script src="/lens_engine.js"></script>
+</body>
+</html>

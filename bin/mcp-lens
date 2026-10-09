@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+"""MCP Lens - Zero-Dependency Model Context Protocol Traffic Sniffer.
+
+Engineered by Neal Frazier Tech (@1nc0gn30) • NullAI Platform.
+"""
+
+import os
+import sys
+
+# Ensure src/ is on sys.path
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+SRC_DIR = os.path.join(PROJECT_ROOT, "src")
+
+if SRC_DIR not in sys.path:
+    sys.path.insert(0, SRC_DIR)
+
+from mcp_lens.cli import main
+
+if __name__ == "__main__":
+    sys.exit(main())
