@@ -79,6 +79,8 @@
           "@type": "Offer",
           "price": "19.00",
           "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock",
+          "url": "https://buy.stripe.com/7sI7sA8hM2X8eFG8ww",
           "description": "Lifetime Founding Member License with Pro Export Suite"
         },
         "author": {
@@ -205,13 +207,13 @@
 
       <div class="flex flex-wrap items-center justify-center sm:justify-end gap-1.5 shrink-0">
         <!-- Stripe Checkout -->
-        <a href="https://buy.stripe.com/test_placeholder_mcp_lens" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded bg-gold-500 hover:bg-gold-400 text-obsidian font-semibold transition text-xs flex items-center space-x-1 shadow-lg shadow-gold-500/20" aria-label="Purchase MCP Lens with Stripe">
-          <span>Credit Card / Apple Pay</span>
+        <a href="https://buy.stripe.com/7sI7sA8hM2X8eFG8ww" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded bg-gold-500 hover:bg-gold-400 text-obsidian font-semibold transition text-xs flex items-center space-x-1 shadow-lg shadow-gold-500/20" aria-label="Purchase MCP Lens with Stripe">
+          <span>⚡ Stripe Pay $19</span>
         </a>
         <!-- Solana DePay Checkout -->
-        <button onclick="window.openPaywallModal('Solana Payment')" class="px-3 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-cyan-300 border border-cyan-500/40 font-medium transition text-xs flex items-center space-x-1" aria-label="Pay with Solana DePay">
-          <span>Solana / Crypto</span>
-        </button>
+        <a href="https://depay.com/pay?integration=428790dd-7ad1-407c-8ecf-c048c77a4cb8&receiver=GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK&amount=19" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-cyan-300 border border-cyan-500/40 font-medium transition text-xs flex items-center space-x-1" aria-label="Pay with Solana DePay">
+          <span>◎ Solana $19</span>
+        </a>
         <!-- Instant Key Activation -->
         <button onclick="window.openPaywallModal('License Activation')" class="text-zinc-400 hover:text-white underline text-[11px] ml-1" aria-label="Activate existing license">
           Activate Key
@@ -720,12 +722,12 @@
         </div>
 
         <div class="grid grid-cols-2 gap-2 pt-1">
-          <a href="https://buy.stripe.com/test_placeholder_mcp_lens" target="_blank" rel="noopener noreferrer" class="py-2.5 rounded-lg bg-gold-500 hover:bg-gold-400 text-obsidian font-bold text-xs font-mono text-center transition shadow-lg shadow-gold-500/20" aria-label="Pay with credit card">
-            Stripe / Card
+          <a href="https://buy.stripe.com/7sI7sA8hM2X8eFG8ww" target="_blank" rel="noopener noreferrer" class="py-2.5 rounded-lg bg-gold-500 hover:bg-gold-400 text-obsidian font-bold text-xs font-mono text-center transition shadow-lg shadow-gold-500/20" aria-label="Pay with credit card">
+            ⚡ Stripe Pay $19
           </a>
-          <button onclick="alert('Solana Receiver: GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK\nIntegration ID: 428790dd-7ad1-407c-8ecf-c048c77a4cb8\nSend 0.095 SOL or 19 USDC')" class="py-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-cyan-300 border border-cyan-500/50 font-bold text-xs font-mono text-center transition" aria-label="Pay with Solana">
-            Solana / DePay
-          </button>
+          <a href="https://depay.com/pay?integration=428790dd-7ad1-407c-8ecf-c048c77a4cb8&receiver=GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK&amount=19" target="_blank" rel="noopener noreferrer" class="py-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-cyan-300 border border-cyan-500/50 font-bold text-xs font-mono text-center transition" aria-label="Pay with Solana">
+            ◎ Solana $19
+          </a>
         </div>
       </div>
 
