@@ -427,7 +427,7 @@ class MCPLensRequestHandler(SimpleHTTPRequestHandler):
 class MCPLensServer:
     """Manages the lifecycle of the MCP Lens Web Cockpit HTTP Server."""
 
-    def __init__(self, host: str = "0.0.0.0", port: int = 8109, public_dir: Optional[str] = None):
+    def __init__(self, host: str = "127.0.0.1", port: int = 8109, public_dir: Optional[str] = None):
         self.host = host
         self.port = port
         self.public_dir = public_dir

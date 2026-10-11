@@ -20,6 +20,24 @@ from .proxy import GLOBAL_TRAFFIC, StdioProxy
 from .server import MCPLensServer
 
 
+def _default_bind_host() -> str:
+    """Bind address: localhost unless explicitly opted in via $ZOTH_BIND_HOST or
+    $HOST (IP literal only; zsh sets HOST to the hostname) or --host."""
+    import ipaddress, os
+    for var in ("ZOTH_BIND_HOST", "HOST"):
+        val = os.environ.get(var, "").strip()
+        if val == "localhost":
+            return "127.0.0.1"
+        if val:
+            try:
+                ipaddress.ip_address(val)
+                return val
+            except ValueError:
+                pass
+    return "127.0.0.1"
+
+
+
 BANNER = r"""
  __  __  ____ ____    _     _____ _   _ ____  
 |  \/  |/ ___|  _ \  | |   | ____| \ | / ___| 
@@ -166,7 +184,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
         parser = argparse.ArgumentParser(description="MCP Lens - Zero-Dependency Model Context Protocol Traffic Sniffer")
         parser.add_argument("--port", type=int, default=8109, help="Web Cockpit port (default: 8109)")
-        parser.add_argument("--host", default="0.0.0.0", help="Web Cockpit host (default: 0.0.0.0)")
+        parser.add_argument("--host", default=_default_bind_host(), help="Host interface (default: 127.0.0.1 or $ZOTH_BIND_HOST; use 0.0.0.0 only on trusted networks)")
         parser.add_argument("--no-server", action="store_true", help="Disable embedded Web Cockpit HTTP server")
         parsed = parser.parse_args(pre_args)
         return cmd_proxy(parsed, post_args)
@@ -191,12 +209,12 @@ Examples:
     # serve
     p_serve = subparsers.add_parser("serve", help="Run the Web Cockpit and Telemetry server")
     p_serve.add_argument("--port", type=int, default=8109, help="Port to bind (default: 8109)")
-    p_serve.add_argument("--host", default="0.0.0.0", help="Host interface (default: 0.0.0.0)")
+    p_serve.add_argument("--host", default=_default_bind_host(), help="Host interface (default: 127.0.0.1 or $ZOTH_BIND_HOST; use 0.0.0.0 only on trusted networks)")
 
     # proxy
     p_proxy = subparsers.add_parser("proxy", help="Transparently proxy stdio for a child MCP server")
     p_proxy.add_argument("--port", type=int, default=8109, help="Web Cockpit port (default: 8109)")
-    p_proxy.add_argument("--host", default="0.0.0.0", help="Web Cockpit host (default: 0.0.0.0)")
+    p_proxy.add_argument("--host", default=_default_bind_host(), help="Host interface (default: 127.0.0.1 or $ZOTH_BIND_HOST; use 0.0.0.0 only on trusted networks)")
     p_proxy.add_argument("--no-server", action="store_true", help="Disable embedded Web Cockpit HTTP server")
     p_proxy.add_argument("cmd", nargs=argparse.REMAINDER, help="Child MCP server command and arguments")
 
