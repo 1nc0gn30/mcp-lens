@@ -311,33 +311,49 @@
     elModalFrameDetail = document.getElementById("frame-detail-modal");
     elFrameJsonContent = document.getElementById("frame-raw-json");
     elFrameMetaContent = document.getElementById("frame-meta-tags");
-    elLicenseKeyInput = document.getElementById("license-key-input") || document.getElementById("input-license-key");
-    elProBadge = document.getElementById("pro-badge") || document.getElementById("header-pro-badge");
+    elLicenseKeyInput = document.getElementById("licenseKeyInput") || document.getElementById("license-key-input") || document.getElementById("input-license-key");
+    elProBadge = document.getElementById("licenseBadge") || document.getElementById("pro-badge") || document.getElementById("header-pro-badge");
   }
 
   // 1. License & Paywall Engine
   function checkLicenseStatus() {
     const urlParams = new URLSearchParams(window.location.search);
-    const hasParam = urlParams.get("licensed") === "true";
-    const hasStorage = localStorage.getItem("mcp_lens_pro") === "active";
+    const hasParam = urlParams.get("licensed") === "true" || window.location.search.includes("session_id=");
+    const hasStorage = localStorage.getItem("mcp_lens_pro") === "active" ||
+                       localStorage.getItem("zoth_mcp_lens_licensed") === "true" ||
+                       localStorage.getItem("pro_licensed") === "true";
 
     if (hasParam || hasStorage) {
       localStorage.setItem("mcp_lens_pro", "active");
+      localStorage.setItem("zoth_mcp_lens_licensed", "true");
+      localStorage.setItem("pro_licensed", "true");
       state.isPro = true;
       unlockProFeatures();
       if (hasParam) {
         showNotification("⭐ Pro License Activated! Thank you for supporting sovereign AI tools.");
+        try {
+          const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+          window.history.replaceState({ path: cleanUrl }, document.title, cleanUrl);
+        } catch (e) {}
       }
+    } else {
+      const badge = document.getElementById("licenseBadge") || elProBadge;
+      if (badge) {
+        badge.textContent = "⚡ FREE TIER";
+      }
+      const banner = document.getElementById("salesBanner") || document.getElementById("sales-banner");
+      if (banner) banner.style.display = "";
     }
   }
 
   function unlockProFeatures() {
-    if (elProBadge) {
-      elProBadge.textContent = "⭐ PRO ACTIVE";
-      elProBadge.className = "px-2 sm:px-2.5 py-1 rounded text-[11px] sm:text-xs font-mono font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/60 shadow-lg shadow-emerald-500/20";
+    const badge = document.getElementById("licenseBadge") || elProBadge;
+    if (badge) {
+      badge.textContent = "⭐ PRO ACTIVE";
+      badge.className = "px-2 sm:px-2.5 py-1 rounded text-[11px] sm:text-xs font-mono font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/60 shadow-lg shadow-emerald-500/20";
     }
     const legacyBadge = document.getElementById("header-pro-badge");
-    if (legacyBadge && legacyBadge !== elProBadge) {
+    if (legacyBadge && legacyBadge !== badge) {
       legacyBadge.textContent = "⭐ PRO ACTIVE";
     }
 
@@ -348,7 +364,7 @@
     document.querySelectorAll(".pro-lock-gate, #schema-paywall-overlay").forEach((el) => {
       el.style.display = "none";
     });
-    const banner = document.getElementById("sales-banner");
+    const banner = document.getElementById("salesBanner") || document.getElementById("sales-banner");
     if (banner) {
       banner.style.display = "none";
     }
@@ -360,13 +376,19 @@
       headerKeyBtn.style.opacity = "0.7";
       headerKeyBtn.style.cursor = "default";
     }
+
+    localStorage.setItem("mcp_lens_pro", "active");
+    localStorage.setItem("zoth_mcp_lens_licensed", "true");
+    localStorage.setItem("pro_licensed", "true");
   }
 
-  window.activateLicenseKey = function () {
-    const val = elLicenseKeyInput ? elLicenseKeyInput.value.trim() : "";
+  window.activateLicenseKey = function (key) {
+    const val = (key || (elLicenseKeyInput ? elLicenseKeyInput.value : "")).trim();
     const status = document.getElementById("license-status");
-    if (val.length >= 5 || val.toUpperCase() === "LENS-PRO-2026") {
+    if (val.length >= 4 || val.includes("@") || val.toUpperCase() === "LENS-PRO-2026" || val.toUpperCase() === "SOVEREIGN-PRO-2026") {
       localStorage.setItem("mcp_lens_pro", "active");
+      localStorage.setItem("zoth_mcp_lens_licensed", "true");
+      localStorage.setItem("pro_licensed", "true");
       state.isPro = true;
       if (status) {
         status.style.color = "#34D399";
@@ -374,15 +396,15 @@
       }
       unlockProFeatures();
       setTimeout(() => {
-        closePaywallModal();
-      }, 700);
+        window.closePaywallModal();
+      }, 500);
       showNotification("✓ License validated! All export tools and minifiers unlocked.");
     } else {
       if (status) {
         status.style.color = "#F87171";
         status.textContent = "⚠️ Invalid license key. Please check your receipt.";
       } else {
-        alert("Please enter a valid founding license key or receipt email.");
+        showNotification("Please enter a valid founding license key or receipt email.");
       }
     }
   };
@@ -422,9 +444,9 @@
   window.triggerDePayCheckout = function () {
     const solanaAddress = "GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK";
     navigator.clipboard.writeText(solanaAddress).then(() => {
-      alert("Solana Receiver Address Copied: " + solanaAddress + "\n\nSend $19 equivalent in SOL or USDC, then activate with your tx hash or receipt email!");
+      showNotification("Solana Receiver Address Copied: " + solanaAddress);
     }).catch(() => {
-      alert("Solana Receiver Address:\n" + solanaAddress + "\n\nSend $19 equivalent, then activate with your tx hash.");
+      showNotification("Solana Receiver: " + solanaAddress);
     });
   };
 
