@@ -1,3 +1,9 @@
+<div align="center">
+  <img src="assets/hero-banner.svg" alt="MCP Lens — Sovereign Architecture Banner" width="100%" />
+</div>
+
+<br />
+
 # MCP Lens (⬡)
 
 > ⚡ **Live Web Application**: [https://mcp-lens.netlify.app](https://mcp-lens.netlify.app)  
