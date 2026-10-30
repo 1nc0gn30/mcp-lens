@@ -6,9 +6,9 @@
 
 # MCP Lens (⬡)
 
-> ⚡ **Live Web Application**: [https://mcp-lens.netlify.app](https://mcp-lens.netlify.app)  
-> 💳 **Unlock Pro Lifetime License ($19 One-Time, $0/mo)**: **[Instant Pro Unlock via Stripe](https://buy.stripe.com/4gMfZg9AheOsdhKbcAfw40L)** *(Use promo code `FOUNDER25` for 25% off)*  
-> 🏆 **All-Access Sovereign Pro Bundle (All 44 Tools — $49 Lifetime)**: **[Get All 44 Studios via Stripe](https://buy.stripe.com/eVq14m5k16hW4Le0xWfw40M)**
+> ⚡ **Live Web Application**: [https://mcp-lens.nullai.tech](https://mcp-lens.nullai.tech)  
+> ✦ **100% Free & Open-Access Sovereign Developer Tool**: Zero paywalls, zero license keys, zero gatekeepers.  
+> ☕ **Buy Us a Coffee**: **[Support via Stripe](https://buy.stripe.com/3cIfZg27PdKo2D64Ocfw40X)** | **Solana Tip**: `GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK`  
 
 > **The Zero-Dependency Real-Time Stdio/SSE Traffic Sniffer, Token Weight Auditor, and Visual Playground for the Model Context Protocol (MCP).**
 
@@ -227,13 +227,14 @@ Target: http://127.0.0.1:8109
 
 ---
 
-## 8. Sovereign Monetization & Pro Licensing
+## 8. 100% Free & Open-Access Architecture (Zero Paywalls)
 
-- **Sales Funnel Banner**: Urgent lifetime founding pass ($19 vs $79 regular).
-- **Payment Rails**:
-  - Stripe Checkout (Credit Card, Apple Pay, Google Pay).
-  - DePay Solana Payment Widget (Integration ID `428790dd-7ad1-407c-8ecf-c048c77a4cb8`, Solana receiver `GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK`).
-- **Instant Client-Side Activation**: Supports receipt email/license key activation and automatic URL parameter unlocking (`?licensed=true`), permanently persisting in `localStorage` and removing all paywall blurs.
+Every capability of MCP Lens is completely unlocked, free, and open by default:
+- **Zero Paywalls**: No license modals, no blurred text, no forced paywall gates, and zero action interceptors.
+- **Full Utility**: Real-time stdio/SSE sniffer, schema minifier, token auditor, and interactive playground run 100% locally and in-browser.
+- **Voluntary Coffee & Tips**:
+  - **Stripe Buy Us a Coffee**: [https://buy.stripe.com/3cIfZg27PdKo2D64Ocfw40X](https://buy.stripe.com/3cIfZg27PdKo2D64Ocfw40X)
+  - **Solana Tip Address**: `GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK` (`solana:GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK`)
 
 ---
 

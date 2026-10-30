@@ -1,0 +1,87 @@
+/* ==========================================================================
+   MCP Lens — Wave Telemetry Surface Enhancements
+   Focus, Type Hierarchy & Motion Primitives
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Visible Focus Invariant (WCAG 2.4.7 Compliant)
+   -------------------------------------------------------------------------- */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 2px solid #38bdf8 !important;
+  outline-offset: 2px !important;
+}
+
+input:focus-visible,
+select:focus-visible {
+  border-color: #38bdf8 !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. Precision Type Hierarchy & Working Tool Surface Polish
+   -------------------------------------------------------------------------- */
+thead th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+tbody td {
+  font-variant-numeric: tabular-nums;
+}
+
+label {
+  letter-spacing: 0.02em;
+}
+
+h2 {
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  letter-spacing: -0.01em;
+}
+
+pre {
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --------------------------------------------------------------------------
+   3. Result Arrival Motion (Transform & Opacity Only — EASE_OUT_EXPO)
+   -------------------------------------------------------------------------- */
+@keyframes resultAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#waterfall-body tr,
+#auditor-table-body tr,
+#tool-exec-result > div,
+#frame-detail-modal > div {
+  animation: resultAppear 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* --------------------------------------------------------------------------
+   4. Accessibility: Reduced Motion Override
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  #waterfall-body tr,
+  #auditor-table-body tr,
+  #tool-exec-result > div,
+  #frame-detail-modal > div {
+    animation: none !important;
+    transform: none !important;
+  }
+}

@@ -95,26 +95,53 @@ def cmd_proxy(args: argparse.Namespace, child_cmd: List[str]) -> int:
 
 def cmd_status(args: argparse.Namespace) -> int:
     """Query and display live health and telemetry stats from running MCP Lens server."""
-    url = f"http://{args.host}:{args.port}/api/stats"
-    health_url = f"http://{args.host}:{args.port}/api/health"
+    host = getattr(args, "host", "127.0.0.1")
+    port = getattr(args, "port", 8109)
+    url = f"http://{host}:{port}/api/stats"
+    health_url = f"http://{host}:{port}/api/health"
+
+    health = {}
+    stats = {}
+    online = True
 
     try:
         with urllib.request.urlopen(health_url, timeout=2.0) as resp:
             health = json.loads(resp.read().decode("utf-8"))
     except Exception as e:
-        print(f"Error: Could not connect to MCP Lens server at http://{args.host}:{args.port} ({e})")
-        return 1
+        online = False
+        health = {"status": "offline", "error": str(e)}
 
-    try:
-        with urllib.request.urlopen(url, timeout=2.0) as resp:
-            stats = json.loads(resp.read().decode("utf-8"))
-    except Exception as e:
-        print(f"Error: Failed to fetch telemetry statistics ({e})")
+    if online:
+        try:
+            with urllib.request.urlopen(url, timeout=2.0) as resp:
+                stats = json.loads(resp.read().decode("utf-8"))
+        except Exception as e:
+            stats = {"error": str(e)}
+
+    if getattr(args, "json", False):
+        print(json.dumps({
+            "service": "mcp-lens",
+            "version": "2.5.0",
+            "online": online,
+            "port": port,
+            "host": host,
+            "health": health,
+            "stats": stats,
+            "license": "100% Free & Open Access (Zero Paywalls)",
+            "support": {
+                "stripe": "https://buy.stripe.com/3cIfZg27PdKo2D64Ocfw40X",
+                "solana": "GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK"
+            }
+        }, indent=2))
+        return 0 if online else 1
+
+    if not online:
+        print(f"Error: Could not connect to MCP Lens server at http://{host}:{port} ({health.get('error')})")
         return 1
 
     print(BANNER)
     print(f"Service Status:       ONLINE ({health.get('status')})")
-    print(f"Server Port:          {args.port}")
+    print(f"Server Port:          {port}")
     print(f"Engine Uptime:        {health.get('uptime_seconds')}s")
     print("-" * 55)
     print(f"Total Tapped Frames:  {stats.get('total_frames', 0):,}")
@@ -123,6 +150,8 @@ def cmd_status(args: argparse.Namespace) -> int:
     print(f"Cumulative Tokens:    {stats.get('total_tokens', 0):,}")
     print(f"Token Overhead (Raw): {stats.get('token_overhead', 0):,} tokens")
     print(f"Minified Potential:   {stats.get('potential_savings_tokens', 0):,} tokens saved ({stats.get('savings_percent', 0)}% reduction)")
+    print("-" * 55)
+    return 0
     print("-" * 55)
     return 0
 
@@ -202,7 +231,11 @@ Examples:
   mcp-lens test
         """
     )
-    parser.add_argument("-v", "--version", action="version", version="mcp-lens 1.0.0")
+    parser.add_argument("-v", "--version", action="version", version="mcp-lens 2.5.0")
+    parser.add_argument("--status", action="store_true", help="Query status of local MCP Lens instance")
+    parser.add_argument("--json", action="store_true", help="Output status/telemetry in structured JSON")
+    parser.add_argument("--port", type=int, default=8109, help="Server port (default: 8109)")
+    parser.add_argument("--host", default="127.0.0.1", help="Server host (default: 127.0.0.1)")
 
     subparsers = parser.add_subparsers(dest="subcommand", help="Available subcommands")
 
@@ -222,11 +255,15 @@ Examples:
     p_status = subparsers.add_parser("status", help="Inspect status and metrics of running MCP Lens")
     p_status.add_argument("--port", type=int, default=8109, help="Server port (default: 8109)")
     p_status.add_argument("--host", default="127.0.0.1", help="Server host (default: 127.0.0.1)")
+    p_status.add_argument("--json", action="store_true", help="Output status in structured JSON format")
 
     # test
     p_test = subparsers.add_parser("test", help="Execute internal diagnostics and schema self-tests")
 
     args = parser.parse_args(argv)
+
+    if getattr(args, "status", False) or getattr(args, "json", False) and not args.subcommand:
+        return cmd_status(args)
 
     if args.subcommand == "serve":
         return cmd_serve(args)

@@ -1,0 +1,86 @@
+/* ==========================================================================
+   MCP Lens — Wave Typography Enhancements
+   Readable Measure, Tabular Numerics & Optical Heading Tracking
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Readable Measure on the Main Work Surface (60–72ch Body Copy)
+   -------------------------------------------------------------------------- */
+main {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+main p {
+  max-width: 68ch;
+  line-height: 1.625;
+  text-wrap: pretty;
+}
+
+#tab-waterfall p,
+#tab-playground p,
+#tab-auditor p,
+#tab-recipes p {
+  max-width: 68ch;
+}
+
+.pro-blur-overlay p,
+.pro-lock-gate p {
+  max-width: 54ch;
+  line-height: 1.55;
+}
+
+#modalFeatureName {
+  max-width: 48ch;
+}
+
+/* --------------------------------------------------------------------------
+   2. Tabular Numbers on Existing Scores, Metrics & Prices
+   -------------------------------------------------------------------------- */
+#stat-total-frames,
+#stat-total-bytes,
+#stat-total-tokens,
+#stat-tokens-saved,
+#tool-raw-tokens,
+#tool-min-tokens,
+#tool-savings-pct,
+#waterfall-body td,
+#auditor-table-body td,
+#salesBanner,
+#salesBanner span,
+#paywall-modal,
+.btn-depay-trigger,
+#btn-depay-solana,
+#btn-depay-modal,
+#licenseBadge {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* --------------------------------------------------------------------------
+   3. Clearer Heading Tracking (Optical Cohesion & Balanced Word Wrap)
+   -------------------------------------------------------------------------- */
+h1 {
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+  line-height: 1.15;
+}
+
+h2 {
+  letter-spacing: -0.018em;
+  text-wrap: balance;
+}
+
+h3 {
+  letter-spacing: -0.014em;
+  text-wrap: balance;
+}
+
+h4 {
+  letter-spacing: -0.01em;
+}
+
+#paywall-feature-title {
+  letter-spacing: -0.022em;
+}

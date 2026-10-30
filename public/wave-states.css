@@ -1,0 +1,204 @@
+/* ==========================================================================
+   MCP Lens — Wave States & Interaction Invariants
+   Focus-Visible, Tactile Hover, Empty & Error Presentation, Reduced-Motion
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Precision Focus-Visible (WCAG 2.4.7 & 2.4.11 AA Compliance)
+   -------------------------------------------------------------------------- */
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 2px solid #38bdf8 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
+}
+
+#licenseKeyInput:focus-visible,
+#btnActivateKey:focus-visible {
+  outline: 2px solid #d4af37 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3) !important;
+}
+
+.filter-btn:focus-visible {
+  outline: 2px solid #38bdf8 !important;
+  outline-offset: 1px !important;
+}
+
+#modal-close-btn:focus-visible {
+  outline: 2px solid #94a3b8 !important;
+  outline-offset: 2px !important;
+  border-radius: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   2. Tactile Hover Feedback (Fast 140ms Response Time)
+   -------------------------------------------------------------------------- */
+button,
+.filter-btn,
+#btnActivateKey,
+#btn-stream-pause,
+#btn-stream-clear,
+#btn-copy-minified,
+#btn-export-cursor,
+#btn-export-all,
+#btn-header-key,
+#btn-depay-solana,
+#btn-depay-modal,
+.btn-depay-trigger {
+  transition: transform 140ms cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 140ms cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 140ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 140ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+button:hover:not(:disabled),
+.filter-btn:hover:not(:disabled),
+#btn-header-key:hover,
+#btn-stream-pause:hover,
+#btn-stream-clear:hover,
+#btn-copy-minified:hover,
+#btn-export-cursor:hover,
+#btn-export-all:hover,
+#btnActivateKey:hover {
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled),
+.filter-btn:active:not(:disabled),
+#btnActivateKey:active {
+  transform: translateY(0);
+}
+
+#modal-close-btn {
+  transition: color 140ms ease, transform 140ms ease;
+}
+
+#modal-close-btn:hover {
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+#licenseBadge:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.25);
+}
+
+#waterfall-search {
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+#waterfall-search:hover {
+  border-color: #475569;
+}
+
+#tool-selector {
+  transition: border-color 160ms ease;
+}
+
+#tool-selector:hover {
+  border-color: #475569;
+}
+
+#tab-btn-waterfall,
+#tab-btn-playground,
+#tab-btn-auditor,
+#tab-btn-recipes {
+  transition: color 140ms ease, border-color 140ms ease, background-color 140ms ease;
+}
+
+#tab-btn-waterfall:hover,
+#tab-btn-playground:hover,
+#tab-btn-auditor:hover,
+#tab-btn-recipes:hover {
+  color: #f8fafc;
+}
+
+#waterfall-body tr,
+#auditor-table-body tr {
+  transition: background-color 120ms ease;
+}
+
+#waterfall-body tr:hover,
+#auditor-table-body tr:hover {
+  background-color: rgba(30, 41, 59, 0.45) !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. Empty State Presentation
+   -------------------------------------------------------------------------- */
+#license-status:empty {
+  display: none;
+}
+
+#frame-meta-tags:empty {
+  display: none;
+}
+
+#raw-schema-code:empty::before,
+#min-schema-code:empty::before {
+  content: "Awaiting tool selection or telemetry stream...";
+  color: #64748b;
+  font-style: italic;
+  display: block;
+  padding: 1rem;
+}
+
+#tool-exec-result:empty::before {
+  content: "Click \"Run Tool\" to simulate JSON-RPC execution...";
+  color: #64748b;
+  font-style: italic;
+}
+
+/* --------------------------------------------------------------------------
+   4. Error State Presentation & Optical Alerts
+   -------------------------------------------------------------------------- */
+.filter-btn[data-filter="errors"]:hover {
+  border-color: rgba(244, 63, 94, 0.6) !important;
+  color: #fda4af !important;
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.2);
+}
+
+#license-status {
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+input:invalid {
+  border-color: #f87171 !important;
+  box-shadow: 0 0 0 1px #f87171 !important;
+}
+
+/* Highlight frame rows containing JSON-RPC errors */
+#waterfall-body tr:has(.text-rose-400) {
+  background-color: rgba(244, 63, 94, 0.04);
+  border-left: 2px solid rgba(244, 63, 94, 0.6);
+}
+
+#waterfall-body tr:has(.text-rose-400):hover {
+  background-color: rgba(244, 63, 94, 0.09) !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. Reduced-Motion Invariant (Zero Movement / Immediate State Switches)
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  button:hover:not(:disabled),
+  .filter-btn:hover:not(:disabled),
+  #btnActivateKey:hover,
+  #modal-close-btn:hover,
+  #waterfall-body tr:hover,
+  #auditor-table-body tr:hover {
+    transform: none !important;
+  }
+}

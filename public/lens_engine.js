@@ -315,46 +315,24 @@
     elProBadge = document.getElementById("licenseBadge") || document.getElementById("pro-badge") || document.getElementById("header-pro-badge");
   }
 
-  // 1. License & Paywall Engine
+  // 1. License & Paywall Engine — 100% Free & Open Access Invariant
   function checkLicenseStatus() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasParam = urlParams.get("licensed") === "true" || window.location.search.includes("session_id=");
-    const hasStorage = localStorage.getItem("mcp_lens_pro") === "active" ||
-                       localStorage.getItem("zoth_mcp_lens_licensed") === "true" ||
-                       localStorage.getItem("pro_licensed") === "true";
-
-    if (hasParam || hasStorage) {
-      localStorage.setItem("mcp_lens_pro", "active");
-      localStorage.setItem("zoth_mcp_lens_licensed", "true");
-      localStorage.setItem("pro_licensed", "true");
-      state.isPro = true;
-      unlockProFeatures();
-      if (hasParam) {
-        showNotification("⭐ Pro License Activated! Thank you for supporting sovereign AI tools.");
-        try {
-          const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-          window.history.replaceState({ path: cleanUrl }, document.title, cleanUrl);
-        } catch (e) {}
-      }
-    } else {
-      const badge = document.getElementById("licenseBadge") || elProBadge;
-      if (badge) {
-        badge.textContent = "⚡ FREE TIER";
-      }
-      const banner = document.getElementById("salesBanner") || document.getElementById("sales-banner");
-      if (banner) banner.style.display = "";
-    }
+    state.isPro = true;
+    localStorage.setItem("mcp_lens_pro", "active");
+    localStorage.setItem("zoth_mcp_lens_licensed", "true");
+    localStorage.setItem("pro_licensed", "true");
+    unlockProFeatures();
   }
 
   function unlockProFeatures() {
     const badge = document.getElementById("licenseBadge") || elProBadge;
     if (badge) {
-      badge.textContent = "⭐ PRO ACTIVE";
+      badge.textContent = "✦ 100% OPEN ACCESS";
       badge.className = "px-2 sm:px-2.5 py-1 rounded text-[11px] sm:text-xs font-mono font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/60 shadow-lg shadow-emerald-500/20";
     }
     const legacyBadge = document.getElementById("header-pro-badge");
     if (legacyBadge && legacyBadge !== badge) {
-      legacyBadge.textContent = "⭐ PRO ACTIVE";
+      legacyBadge.textContent = "✦ 100% OPEN ACCESS";
     }
 
     // Remove frosted blur from paywalled sections
@@ -371,10 +349,10 @@
 
     const headerKeyBtn = document.getElementById("btn-header-key");
     if (headerKeyBtn) {
-      headerKeyBtn.textContent = "⭐ Pro Unlocked";
-      headerKeyBtn.disabled = true;
-      headerKeyBtn.style.opacity = "0.7";
-      headerKeyBtn.style.cursor = "default";
+      headerKeyBtn.textContent = "☕ Buy Us a Coffee";
+      headerKeyBtn.onclick = function() {
+        window.open("https://buy.stripe.com/3cIfZg27PdKo2D64Ocfw40X", "_blank");
+      };
     }
 
     localStorage.setItem("mcp_lens_pro", "active");
@@ -383,47 +361,12 @@
   }
 
   window.activateLicenseKey = function (key) {
-    const val = (key || (elLicenseKeyInput ? elLicenseKeyInput.value : "")).trim();
-    const status = document.getElementById("license-status");
-    if (val.length >= 4 || val.includes("@") || val.toUpperCase() === "LENS-PRO-2026" || val.toUpperCase() === "SOVEREIGN-PRO-2026") {
-      localStorage.setItem("mcp_lens_pro", "active");
-      localStorage.setItem("zoth_mcp_lens_licensed", "true");
-      localStorage.setItem("pro_licensed", "true");
-      state.isPro = true;
-      if (status) {
-        status.style.color = "#34D399";
-        status.textContent = "🎉 License key verified! Unlocking Pro privileges...";
-      }
-      unlockProFeatures();
-      setTimeout(() => {
-        window.closePaywallModal();
-      }, 500);
-      showNotification("✓ License validated! All export tools and minifiers unlocked.");
-    } else {
-      if (status) {
-        status.style.color = "#F87171";
-        status.textContent = "⚠️ Invalid license key. Please check your receipt.";
-      } else {
-        showNotification("Please enter a valid founding license key or receipt email.");
-      }
-    }
+    unlockProFeatures();
+    showNotification("✓ All features 100% free & open-access.");
   };
 
   window.openPaywallModal = function (featureName) {
-    if (state.isPro) return;
-    if (elModalPaywall) {
-      elModalPaywall.classList.remove("hidden");
-      elModalPaywall.classList.add("flex");
-      const title = document.getElementById("paywall-feature-title");
-      if (title && featureName) {
-        title.textContent = `Unlock ${featureName}`;
-      }
-      const status = document.getElementById("license-status");
-      if (status) status.textContent = "";
-      setTimeout(() => {
-        if (elLicenseKeyInput) elLicenseKeyInput.focus();
-      }, 60);
-    }
+    // 100% Free & Open-Access — No paywalls
   };
 
   window.closePaywallModal = function () {
@@ -434,11 +377,7 @@
   };
 
   window.interceptProAction = function (actionName, callback) {
-    if (state.isPro) {
-      if (typeof callback === "function") callback();
-    } else {
-      window.openPaywallModal(actionName);
-    }
+    if (typeof callback === "function") callback();
   };
 
   window.triggerDePayCheckout = function () {
@@ -1074,7 +1013,7 @@
 
   function escapeHtml(str) {
     return String(str)
-      .replace(/&/g, "&amp;")
+      .replace(/&/g, "&")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")

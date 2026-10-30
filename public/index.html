@@ -21,24 +21,6 @@
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/icon.png">
 
-  <!-- DePay Web3 Solana Widget v13 -->
-  <script src="https://integrate.depay.com/widgets/v13.js" defer></script>
-  <script>
-    window.addEventListener('load', function() {
-      if (typeof window.DePayButtons !== 'undefined') {
-        window.DePayButtons.init({
-          selector: '.btn-depay-trigger',
-          integration: '428790dd-7ad1-407c-8ecf-c048c77a4cb8',
-          payload: {
-            receiver: 'GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK',
-            amount: 19.00,
-            currency: 'USD'
-          }
-        });
-      }
-    });
-  </script>
-
   <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -96,10 +78,10 @@
         "operatingSystem": "Linux, macOS, Windows",
         "offers": {
           "@type": "Offer",
-          "price": "19.00",
+          "price": "0",
           "priceCurrency": "USD",
           "availability": "https://schema.org/InStock",
-          "url": "https://buy.stripe.com/4gMfZg9AheOsdhKbcAfw40L",
+          "url": "https://buy.stripe.com/3cIfZg27PdKo2D64Ocfw40X",
           "description": "Lifetime Founding Member License with Pro Export Suite"
         },
         "author": {
@@ -176,7 +158,7 @@
 
     /* Frosted Paywall Blur */
     .pro-blur-overlay {
-      filter: blur(6px);
+      filter: none;
       pointer-events: none;
       user-select: none;
     }
@@ -205,41 +187,50 @@
       background: #3B425B;
     }
   </style>
+  <link rel="stylesheet" href="/wave.css">
+  <link rel="stylesheet" href="/wave-states.css">
+  <link rel="stylesheet" href="/wave-type.css">
+
+  <!-- Zoth 100% Open-Access & Buy Us a Coffee Invariant -->
+  <script id="zoth-open-access-init">
+    (function() {
+      try {
+        var keys = ['agent_audiocipher_pro', 'agent_cyber_turtle_pro', 'agent_datamosh_pro', 'agent_nexus3d_pro', 'agent_policy_pro', 'audiocipher_license', 'audiocipher_pro_licensed', 'badge3d_pro_licensed', 'certpath_pro_key', 'certpath_pro_licensed', 'cron_rhythm_pro_key', 'cron_rhythm_pro_licensed', 'cwv-speed-engine_pro_licensed', 'cwv_pro_licensed', 'cyber_turtle_pro_licensed', 'datamosh_pro_licensed', 'deepsearch-research-agent_pro_licensed', 'deepsearch_pro_licensed', 'entropy_studio_licensed', 'envguard-secrets-vault_pro_licensed', 'envguard_pro_license', 'etsy_connector_pro', 'jwt_guard_licensed', 'mdg_pro_licensed', 'neuro_pro_licensed', 'nexus3d_pro_licensed', 'omnipost_pro_key', 'omnipost_pro_licensed', 'osint_pro_licensed', 'payload-entropy-studio_pro_licensed', 'polyglot_pro_licensed', 'pro_licensed', 'promptmaster_pro_licensed', 'promptmaster_pro_active', 'robots-txt-auditor_pro_licensed', 'robots_pro_licensed', 'schema_illustrator_pro_licensed', 'sovereign_pro_licensed', 'subsweep-lead-scanner_pro_licensed', 'subsweep_licensed', 'turtle_pro_licensed', 'ufo_sacred_licensed', 'vector-search-engine_pro_licensed', 'vector_studio_pro_licensed', 'web-security-guard_pro_licensed', 'web_security_guard_licensed', 'yourdigitalspace_pro', 'zela_guide_pro_licensed', 'zoth_ascii_magic_pro', 'zoth_audiocipher_licensed', 'zoth_badge3d_licensed', 'zoth_cyber_turtle_licensed', 'zoth_datamosh_licensed', 'zoth_etsy_licensed', 'zoth_nexus3d_licensed', 'zoth_osint_licensed', 'zoth_policy_licensed', 'zoth_sacred_licensed', 'zoth_ufo_licensed'];
+        for (var i = 0; i < keys.length; i++) {
+          localStorage.setItem(keys[i], 'true');
+        }
+        localStorage.setItem('pm_license_v2', JSON.stringify({ method: 'open_access', ref: 'free_forever', at: '2026-01-01T00:00:00Z' }));
+        window.isPro = true;
+        window.isProLicensed = true;
+      } catch (e) {}
+    })();
+  </script>
+  <style id="zoth-open-access-override">
+    .paywall-overlay, .output-paywall-overlay, #outputPaywallOverlay, #schemaPaywallOverlay,
+    #transformerPaywallOverlay, #proPaywallModal, #licenseModal, #salesBanner, #founding-offer-banner,
+    #funnelHeroBanner, [data-alias="paywallOverlay"], [data-alias="founding-offer-banner"] {
+      display: none !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    .paywall-wrap #outputPreview, .paywall-wrap #reportContentArea, .paywall-content,
+    .paywall-content.locked, .paywall-wrap.is-locked #outputPreview, .paywall-wrap.locked #outputPreview {
+      filter: none !important;
+      -webkit-filter: none !important;
+      user-select: auto !important;
+      pointer-events: auto !important;
+    }
+  </style>
+
 </head>
 <body class="min-h-screen flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200 overflow-x-hidden">
 
-  <!-- ========================================== -->
-  <!-- 1. HIGH-CONVERTING SALES FUNNEL BANNER     -->
-  <!-- ========================================== -->
-  <aside id="salesBanner" data-alias="salesBanner" data-alt-id="sales-banner" class="bg-gradient-to-r from-amber-950/80 via-zinc-900 to-sky-950/80 border-b border-gold-500/40 px-3 sm:px-4 py-2.5 text-xs text-zinc-300 relative z-40 overflow-hidden">
-    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2.5">
-      <div class="flex items-center space-x-2 text-center sm:text-left">
-        <span class="inline-flex items-center justify-center px-2 py-0.5 rounded font-mono font-bold bg-gold-500/20 text-gold-400 border border-gold-500/40 uppercase tracking-wider text-[10px]">
-          Founding Member Access
-        </span>
-        <span class="font-medium text-zinc-200">
-          Slash MCP schema token bloat by 35%+. Get Lifetime Pro for 
-          <span class="text-emerald-400 font-bold">$19</span> 
-          <span class="line-through text-zinc-500 text-[11px]">$79</span>
-        </span>
-      </div>
+<div id="zoth-coffee-support-bar" style="background: linear-gradient(90deg, rgba(16,185,129,0.12), rgba(212,175,55,0.14)); border-bottom: 1px solid rgba(212,175,55,0.35); padding: 8px 16px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; z-index: 9999;">
+  <span style="color: #10B981; font-weight: 800;">✦ 100% FREE &amp; OPEN ACCESS · ZERO PAYWALLS</span>
+  <a href="https://buy.stripe.com/3cIfZg27PdKo2D64Ocfw40X" target="_blank" rel="noopener noreferrer" style="background: #D4AF37; color: #08080B; padding: 4px 12px; border-radius: 6px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">☕ Buy Us a Coffee (Stripe)</a>
+  <a href="solana:GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK" onclick="if(navigator.clipboard){navigator.clipboard.writeText('GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK');this.textContent='✓ Copied GG2eQb...dXoK!';}" style="background: rgba(20,241,149,0.15); color: #14F195; border: 1px solid rgba(20,241,149,0.45); padding: 4px 12px; border-radius: 6px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">◎ Solana Tip (GG2e...dXoK)</a>
+</div>
 
-      <div class="flex flex-wrap items-center justify-center sm:justify-end gap-1.5 shrink-0">
-        <!-- Stripe Checkout -->
-        <a href="https://buy.stripe.com/4gMfZg9AheOsdhKbcAfw40L" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded bg-gold-500 hover:bg-gold-400 text-obsidian font-semibold transition text-xs flex items-center space-x-1 shadow-lg shadow-gold-500/20" aria-label="Purchase MCP Lens with Stripe">
-          <span>⚡ Stripe Pay $19</span>
-        </a>
-        <!-- Solana DePay Checkout -->
-        <button type="button" id="btn-depay-solana" onclick="window.triggerDePayCheckout()" class="btn-depay-trigger px-3 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-cyan-300 border border-cyan-500/40 font-medium transition text-xs flex items-center space-x-1" aria-label="Pay with Solana DePay">
-          <span>◎ Solana $19</span>
-        </button>
-        <!-- Instant Key Activation -->
-        <button type="button" id="btn-open-license-modal" onclick="window.openPaywallModal('Sales Banner Activation')" class="text-zinc-400 hover:text-white underline text-[11px] ml-1" aria-label="Activate existing license">
-          Activate Key
-        </button>
-      </div>
-    </div>
-  </aside>
 
   <!-- ========================================== -->
   <!-- 2. APEX NAVIGATION HEADER                  -->
@@ -259,21 +250,21 @@
         </div>
       </div>
 
-      <!-- Live Stream Indicator & Pro Badge -->
+      <!-- Live Stream Indicator & Sovereign Badge -->
       <div class="flex items-center space-x-2 sm:space-x-3 shrink-0">
         <div class="hidden md:flex items-center space-x-2 px-3 py-1 rounded-full bg-surface border border-surfaceBorder text-xs font-mono">
           <span id="sse-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
           <span id="sse-status-text" class="text-zinc-300">Live Stdio Stream Active</span>
         </div>
 
-        <span id="licenseBadge" data-alias="proStatusBadge" data-alt-id="pro-badge" class="px-2 sm:px-2.5 py-1 rounded text-[11px] sm:text-xs font-mono font-semibold bg-red-950/60 text-red-400 border border-red-800/60 cursor-pointer" onclick="window.openPaywallModal('Header Pro Badge')">
-          ⚡ FREE TIER
+        <span id="licenseBadge" class="px-2 sm:px-2.5 py-1 rounded text-[11px] sm:text-xs font-mono font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/60 shadow-lg shadow-emerald-500/20">
+          ✦ 100% FREE &amp; OPEN ACCESS
         </span>
         <span id="header-pro-badge" style="display: none;"></span>
 
-        <button type="button" id="btn-header-key" data-alias="btnActivateKey" onclick="window.openPaywallModal('Header Key Activation')" class="px-2.5 py-1 rounded text-xs font-mono bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition">
-          ✦ Enter Key
-        </button>
+        <a href="https://buy.stripe.com/3cIfZg27PdKo2D64Ocfw40X" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded text-xs font-mono bg-gold-500/20 hover:bg-gold-500/30 text-gold-300 border border-gold-500/40 transition flex items-center space-x-1" aria-label="Buy Us a Coffee">
+          <span>☕ Buy Us a Coffee</span>
+        </a>
 
         <a href="https://github.com/1nc0gn30/mcp-lens" target="_blank" rel="noopener noreferrer" class="hidden sm:flex px-3 py-1 rounded text-xs font-mono bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition items-center space-x-1" aria-label="View MCP Lens on GitHub">
           <span>GitHub</span>
@@ -519,42 +510,22 @@
                 <span>Minified Schema</span>
                 <span class="text-emerald-400 text-[11px]">Production Ready</span>
               </div>
-              <div class="relative">
-                <div id="schema-paywall-overlay" class="pro-lock-gate absolute inset-0 bg-obsidian/85 backdrop-blur-md rounded-lg border border-gold-500/40 p-4 flex flex-col items-center justify-center text-center z-10 space-y-3">
-                  <div class="w-10 h-10 rounded-full bg-gold-500/20 text-gold-400 flex items-center justify-center font-bold text-lg border border-gold-500/40">★</div>
-                  <div>
-                    <h4 class="font-syne font-bold text-white text-sm">Pro Production Schema Locked</h4>
-                    <p class="text-[11px] text-zinc-400 max-w-xs mt-1">Unlock 35%+ token savings, batch schema minification, and instant Cursor & Claude rules export.</p>
-                  </div>
-                  <div class="flex items-center gap-2 pt-1 flex-wrap justify-center">
-                    <a href="https://buy.stripe.com/4gMfZg9AheOsdhKbcAfw40L" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg bg-gold-500 hover:bg-gold-400 text-obsidian font-bold text-xs font-mono transition">
-                      ⚡ Stripe $19
-                    </a>
-                    <button type="button" onclick="window.triggerDePayCheckout()" class="btn-depay-trigger px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-cyan-300 border border-cyan-500/40 text-xs font-mono transition">
-                      ◎ Solana $19
-                    </button>
-                    <button type="button" onclick="window.openPaywallModal('Minified Schema Paywall')" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-mono transition">
-                      ✦ Enter Key
-                    </button>
-                  </div>
-                </div>
-                <pre id="min-schema-code" class="pro-blur-overlay h-80 bg-zinc-950 p-3 rounded-lg border border-zinc-800 text-[11px] font-mono text-emerald-300/90 overflow-auto"></pre>
-              </div>
+              <pre id="min-schema-code" class="h-80 bg-zinc-950 p-3 rounded-lg border border-zinc-800 text-[11px] font-mono text-emerald-300/90 overflow-auto"></pre>
             </div>
           </div>
 
           <!-- Actions -->
           <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
             <button id="btn-copy-minified" onclick="window.copyMinifiedSchema()" class="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-mono transition" aria-label="Copy minified schema">
-              ✦ Copy Minified Schema (Pro)
+              ✦ Copy Minified Schema
             </button>
 
             <button id="btn-export-cursor" onclick="window.exportCursorRules()" class="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-cyan-300 border border-cyan-500/40 text-xs font-mono transition" aria-label="Export Cursor Rules">
-              ↓ Export Cursor Rules (Pro)
+              ↓ Export Cursor Rules
             </button>
 
             <button id="btn-export-all" onclick="window.exportAllSchemas()" class="px-4 py-2 rounded-lg bg-gold-500 hover:bg-gold-400 text-obsidian font-bold text-xs font-mono transition shadow-md shadow-gold-500/10 flex items-center space-x-1" aria-label="Export all minified schemas">
-              <span>Export All Schemas (Pro)</span>
+              <span>Export All Schemas</span>
             </button>
           </div>
         </div>
@@ -600,31 +571,21 @@
         </div>
       </div>
 
-      <!-- Advanced Batch Minification Paywall Blur Container -->
-      <div class="relative bg-surface border border-surfaceBorder rounded-xl p-6 overflow-hidden">
-        <div class="pro-blur-overlay space-y-4">
-          <div class="text-sm font-mono text-zinc-300 font-semibold">Continuous In-Memory AST Minifier Daemon & Token Caching Layer</div>
-          <p class="text-xs text-zinc-400">Auto-injects minified schemas on the fly into Claude Code, Cursor, and Antigravity stdio pipes without altering server code.</p>
-          <div class="h-28 bg-zinc-950 rounded-lg border border-zinc-800 p-3 font-mono text-xs text-zinc-500">
-            [DAEMON] Intercepting tools/list response...<br>
-            [AST] Stripped 1,420 tokens from sqlite_query_records and github_pr_diff.<br>
-            [CACHE] Saved 45,210 tokens across 32 agent iterations today.<br>
-            [PROXY] Forwarding pristine frame to agent client...
+      <!-- Advanced Batch Minification & Caching Layer -->
+      <div class="bg-surface border border-surfaceBorder rounded-xl p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="text-sm font-mono text-zinc-200 font-semibold flex items-center space-x-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <span>Continuous In-Memory AST Minifier Daemon &amp; Token Caching Layer</span>
           </div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800 font-bold">ACTIVE &amp; UNLOCKED</span>
         </div>
-
-        <!-- Frosted Glass Lock Gate -->
-        <div class="pro-lock-gate absolute inset-0 bg-obsidian/70 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-10">
-          <div class="w-12 h-12 rounded-full bg-gold-500/20 border border-gold-500/60 flex items-center justify-center text-gold-400 text-xl mb-3 shadow-lg shadow-gold-500/10">
-            ★
-          </div>
-          <h3 class="font-syne font-bold text-lg text-white mb-1">Unlock Autonomous AST Proxy Minification</h3>
-          <p class="text-xs text-zinc-300 max-w-md mb-4">
-            Automatically intercept and minify all outgoing MCP tool schemas in real-time. Never burn unnecessary tokens on agent runs again.
-          </p>
-          <button onclick="window.openPaywallModal('Autonomous AST Proxy Minifier')" class="px-5 py-2.5 rounded-lg bg-gold-500 hover:bg-gold-400 text-obsidian font-bold text-xs font-mono transition shadow-xl shadow-gold-500/20" aria-label="Unlock Pro">
-            Unlock Lifetime Pro ($19)
-          </button>
+        <p class="text-xs text-zinc-400">Auto-injects minified schemas on the fly into Claude Code, Cursor, and Antigravity stdio pipes without altering server code.</p>
+        <div class="h-28 bg-zinc-950 rounded-lg border border-zinc-800 p-3 font-mono text-xs text-zinc-400">
+          [DAEMON] Intercepting tools/list response...<br>
+          [AST] Stripped 1,420 tokens from sqlite_query_records and github_pr_diff.<br>
+          [CACHE] Saved 45,210 tokens across 32 agent iterations today.<br>
+          [PROXY] Forwarding pristine frame to agent client...
         </div>
       </div>
     </section>
@@ -702,98 +663,6 @@
         <button onclick="window.closeFrameModal()" class="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-obsidian font-bold text-xs font-mono transition" aria-label="Close modal">
           Done
         </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================== -->
-  <!-- 6. HIGH-CONVERTING PRO PAYWALL MODAL       -->
-  <!-- ========================================== -->
-  <div id="paywall-modal" data-alias="licenseModal" data-alt-id="proModal" class="modal-backdrop hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md items-center justify-center p-4">
-    <div class="bg-surface border border-gold-500/50 rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative space-y-5">
-      <button id="modal-close-btn" onclick="window.closePaywallModal()" class="modal-close absolute top-4 right-4 text-zinc-400 hover:text-white font-mono text-base min-w-[32px] min-h-[32px] flex items-center justify-center" aria-label="Close paywall modal">✕</button>
-
-      <div class="text-center space-y-1">
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-gold-500/20 text-gold-400 border border-gold-500/40 uppercase tracking-widest">
-          Founding Member Lifetime Pass
-        </span>
-        <h3 id="paywall-feature-title" class="font-syne text-2xl font-black text-white pt-2">
-          Unlock MCP Lens Pro
-        </h3>
-        <p class="text-xs text-zinc-400" id="modalFeatureName">
-          Permanent sovereign access. Zero subscriptions. No recurring fees.
-        </p>
-      </div>
-
-      <!-- 6 Value Checkpoints -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-zinc-300 py-2">
-        <div class="flex items-center space-x-2">
-          <span class="text-emerald-400 font-bold">✓</span>
-          <span>Batch schema minification</span>
-        </div>
-        <div class="flex items-center space-x-2">
-          <span class="text-emerald-400 font-bold">✓</span>
-          <span>35%+ prompt token savings</span>
-        </div>
-        <div class="flex items-center space-x-2">
-          <span class="text-emerald-400 font-bold">✓</span>
-          <span>1-click Claude & Cursor export</span>
-        </div>
-        <div class="flex items-center space-x-2">
-          <span class="text-emerald-400 font-bold">✓</span>
-          <span>Simulated tool sandbox runner</span>
-        </div>
-        <div class="flex items-center space-x-2">
-          <span class="text-emerald-400 font-bold">✓</span>
-          <span>Zero external pip dependencies</span>
-        </div>
-        <div class="flex items-center space-x-2">
-          <span class="text-emerald-400 font-bold">✓</span>
-          <span>Lifetime updates & support</span>
-        </div>
-      </div>
-
-      <!-- Pricing & Dual Checkout Rails -->
-      <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800 space-y-3">
-        <div class="flex items-center justify-between">
-          <div>
-            <div class="text-xs font-mono text-zinc-400">Lifetime Founding Price</div>
-            <div class="text-2xl font-syne font-bold text-white">
-              $19 <span class="text-xs font-sans text-zinc-500 line-through">$79</span>
-            </div>
-          </div>
-          <span class="px-2 py-0.5 rounded text-[11px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800">
-            SAVE 76%
-          </span>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2 pt-1">
-          <a href="https://buy.stripe.com/4gMfZg9AheOsdhKbcAfw40L" target="_blank" rel="noopener noreferrer" class="py-2.5 rounded-lg bg-gold-500 hover:bg-gold-400 text-obsidian font-bold text-xs font-mono text-center transition shadow-lg shadow-gold-500/20" aria-label="Pay with credit card">
-            ⚡ Stripe Pay $19
-          </a>
-          <button type="button" id="btn-depay-modal" onclick="window.triggerDePayCheckout()" class="btn-depay-trigger py-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-cyan-300 border border-cyan-500/50 font-bold text-xs font-mono text-center transition" aria-label="Pay with Solana">
-            ◎ Solana $19
-          </button>
-        </div>
-      </div>
-
-      <!-- Instant Key Activation -->
-      <div class="pt-1">
-        <label for="licenseKeyInput" class="block text-[11px] font-mono text-zinc-400 mb-1">Already have a key or receipt email?</label>
-        <div class="flex items-center space-x-2">
-          <input 
-            type="text" 
-            id="licenseKeyInput" 
-            data-alias="licenseKeyInput"
-            data-alt-id="license-key-input"
-            placeholder="e.g. LENS-PRO-2026 or receipt email" 
-            class="flex-1 px-3 py-1.5 text-xs font-mono bg-zinc-900 border border-zinc-700 rounded focus:border-cyan-500 focus:outline-none text-zinc-200"
-          />
-          <button type="button" id="btnActivateKey" data-alias="btnActivateKey" data-alt-id="btn-activate-key" onclick="window.activateLicenseKey()" class="px-3.5 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-mono border border-zinc-700 transition" aria-label="Validate license key">
-            Activate
-          </button>
-        </div>
-        <div id="license-status" class="text-xs font-mono mt-1 min-h-[16px]"></div>
       </div>
     </div>
   </div>
