@@ -3,7 +3,7 @@
 **Anchor Shape**: The Prismatic Hexagonal Lens — a floating obsidian prism with glowing gold (`#D4AF37`) aperture bevels and cyber-cyan (`#38BDF8`) laser optics.  
 **Style**: High-velocity Claude 3.5 / Revid.ai cinematic kinetic motion design, 60fps, 4K render, dark obsidian atmosphere, neon accents, tactile sound design.  
 **Product**: MCP Lens — Zero-Dependency Real-Time Stdio/SSE Traffic Sniffer & Token Weight Auditor for Model Context Protocol.  
-**Attribution**: Engineered by Neal Frazier Tech (@1nc0gn30) • NullAI Platform.
+**Attribution**: Engineered by 1nc0gn30 (@1nc0gn30) • NullAI Platform.
 
 ---
 
@@ -35,7 +35,7 @@
 
 ### Shot 5: The Sovereign Hero Lock & CTA (12.5s – 15.0s)
 - **Visual**: The UI zooms back into the Prismatic Hexagonal Lens, which rotates and locks into place like a sovereign vault seal.
-- **Action**: Founding member badge glows: "$19 LIFETIME FOUNDING ACCESS". Dual Stripe & Solana payment badges gleam.
+- **Action**: Founding member badge glows: "$0 LIFETIME FOUNDING ACCESS". Dual Stripe & Solana payment badges gleam.
 - **On-Screen Kinetic Typography**: 
   - "MCP LENS" (Giant Syne 900 typography, pure white with gold stroke).
   - "github.com/1nc0gn30/mcp-lens • nullai.tech"

@@ -1,6 +1,6 @@
 """Command-Line Interface for MCP Lens.
 
-Engineered by Neal Frazier Tech (@1nc0gn30) • NullAI Platform.
+Engineered by 1nc0gn30 (@1nc0gn30) • NullAI Platform.
 100% Python Standard Library — Zero External Dependencies.
 """
 
@@ -45,7 +45,7 @@ BANNER = r"""
 | |  | | |___|  __/  | |___| |___| |\  |___) |
 |_|  |_|\____|_|     |_____|_____|_| \_|____/ 
    Zero-Dependency Model Context Protocol Traffic Sniffer
-   Engineered by Neal Frazier Tech (@1nc0gn30) • NullAI Platform
+   Engineered by 1nc0gn30 (@1nc0gn30) • NullAI Platform
 """
 
 

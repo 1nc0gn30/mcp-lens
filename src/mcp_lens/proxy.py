@@ -1,6 +1,6 @@
 """Transparent Non-Blocking Stdio/SSE Proxy & Frame Sniffer for MCP.
 
-Engineered by Neal Frazier Tech (@1nc0gn30) • NullAI Platform.
+Engineered by 1nc0gn30 (@1nc0gn30) • NullAI Platform.
 Transparently proxies stdio between host AI agent and child MCP server process,
 tapping JSON-RPC 2.0 frames into memory and dispatching to the live Web Cockpit.
 100% Python Standard Library — Zero External Dependencies.

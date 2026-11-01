@@ -12,3 +12,15 @@ output/
 dist/
 build/
 *.egg-info/
+
+.venv/
+.venv*/
+venv/
+node_modules/
+*.pth
+*.onnx
+data/minds/spool.jsonl
+release-artifacts/
+build/*.iso*
+build/live_workspace/
+build/release-*/
