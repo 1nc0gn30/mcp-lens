@@ -138,7 +138,7 @@ Minified Potential:   1,920 tokens saved (36.0% reduction)
 ### Claude Code (Anthropic CLI)
 Wrap your MCP server directly:
 ```bash
-claude mcp add db-server -- /home/zoth/NullAITech/mcp-lens/bin/mcp-lens -- python /path/to/server.py
+claude mcp add db-server -- ~/NullAITech/mcp-lens/bin/mcp-lens -- python /path/to/server.py
 ```
 
 ### Cursor (`~/.cursor/settings.json` or `.cursor/mcp.json`)
@@ -146,7 +146,7 @@ claude mcp add db-server -- /home/zoth/NullAITech/mcp-lens/bin/mcp-lens -- pytho
 {
   "mcpServers": {
     "filesystem-proxied": {
-      "command": "/home/zoth/NullAITech/mcp-lens/bin/mcp-lens",
+      "command": "~/NullAITech/mcp-lens/bin/mcp-lens",
       "args": ["--", "npx", "-y", "@modelcontextprotocol/server-filesystem", "/tmp"]
     }
   }
@@ -156,7 +156,7 @@ claude mcp add db-server -- /home/zoth/NullAITech/mcp-lens/bin/mcp-lens -- pytho
 ### Windsurf & Antigravity IDE
 Configure standard stdio command:
 ```bash
-/home/zoth/NullAITech/mcp-lens/bin/mcp-lens proxy --port 8109 -- npx -y @modelcontextprotocol/server-memory
+~/NullAITech/mcp-lens/bin/mcp-lens proxy --port 8109 -- npx -y @modelcontextprotocol/server-memory
 ```
 
 ---

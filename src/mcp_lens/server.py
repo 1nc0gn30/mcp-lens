@@ -209,7 +209,7 @@ def seed_sample_traffic(traffic: TrafficStore) -> None:
             "params": {
                 "name": "sqlite_query_records",
                 "arguments": {
-                    "database_path": "/home/zoth/data/sovereign.db",
+                    "database_path": "~/data/sovereign.db",
                     "query": "SELECT id, product_name, price FROM items ORDER BY id ASC LIMIT 3;"
                 }
             }
