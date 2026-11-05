@@ -711,6 +711,22 @@
 
   <!-- Main Controller Engine -->
   <script src="/lens_engine.js"></script>
-  <script src="/assets/sovereign-upgrade.js" defer></script>
+  
+
+  <script src="/sovereign_tutorial.js"></script>
+  <script>
+    window.addEventListener("DOMContentLoaded", function() {
+      if (window.createSovereignTutorial) {
+        window.createSovereignTutorial({
+          toolId: "mcp-lens",
+          toolName: "MCP Lens",
+          tagline: "Visual diagnostic microscope for Model Context Protocol servers and tools!",
+          accentColor: "#A855F7",
+          steps: [{"icon": "\ud83d\udd2c", "title": "What is MCP?", "desc": "Model Context Protocol (MCP) is the universal plug that lets AI assistants connect to databases, files, and tools."}, {"icon": "\u26a1", "title": "Inspect Live Tools & Prompts", "desc": "See all tools, resources, and schemas provided by any MCP server with live testing buttons."}, {"icon": "\ud83d\udc1b", "title": "Instant Debugging", "desc": "Find broken arguments, syntax errors, and timeout bugs before launching agents into production."}]
+        });
+      }
+    });
+  </script>
+
 </body>
 </html>
