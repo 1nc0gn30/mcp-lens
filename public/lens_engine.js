@@ -380,6 +380,20 @@
     if (typeof callback === "function") callback();
   };
 
+  window.copySolanaAddress = function (btn) {
+    const addr = "GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK";
+    navigator.clipboard.writeText(addr).then(() => {
+      if (btn) {
+        const orig = btn.textContent;
+        btn.textContent = "✓ Solana Address Copied!";
+        setTimeout(() => { btn.textContent = orig; }, 2500);
+      }
+      showNotification("✓ Solana Tip Address copied to clipboard!");
+    }).catch(() => {
+      window.open("solana:" + addr, "_blank");
+    });
+  };
+
   window.triggerSolanaTipCheckout = function () {
     const solanaAddress = "GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK";
     navigator.clipboard.writeText(solanaAddress).then(() => {
