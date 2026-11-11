@@ -1,11 +1,13 @@
 {
   "name": "mcp-lens",
   "version": "2.5.0",
-  "description": "Zero-dependency real-time stdio/SSE traffic sniffer, token weight auditor, and visual playground for Model Context Protocol.",
-  "author": "1nc0gn30 (@1nc0gn30)",
+  "description": "Zero-dependency real-time stdio/SSE traffic sniffer, token weight auditor, and schema minifier for Model Context Protocol.",
+  "author": "1nc0gn30 (@1nc0gn30) • NullAI",
   "license": "MIT",
   "scripts": {
-    "serve": "python3 -m http.server 8109 --directory public",
-    "test": "python3 -m unittest discover tests"
+    "start": "python3 server.py serve --port 8109",
+    "serve": "python3 server.py serve --port 8109",
+    "serve:public": "python3 -m http.server 8109 --directory public",
+    "test": "PYTHONPATH=src python3 -m pytest -q tests"
   }
 }

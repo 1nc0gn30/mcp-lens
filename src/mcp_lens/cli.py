@@ -129,8 +129,7 @@ def cmd_status(args: argparse.Namespace) -> int:
             "stats": stats,
             "license": "100% Free & Open Access (Zero Paywalls)",
             "support": {
-                "stripe": "https://buy.stripe.com/3cIfZg27PdKo2D64Ocfw40X",
-                "solana": "GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK"
+                "stripe": "https://buy.stripe.com/3cIfZg27PdKo2D64Ocfw40X"
             }
         }, indent=2))
         return 0 if online else 1
@@ -150,8 +149,6 @@ def cmd_status(args: argparse.Namespace) -> int:
     print(f"Cumulative Tokens:    {stats.get('total_tokens', 0):,}")
     print(f"Token Overhead (Raw): {stats.get('token_overhead', 0):,} tokens")
     print(f"Minified Potential:   {stats.get('potential_savings_tokens', 0):,} tokens saved ({stats.get('savings_percent', 0)}% reduction)")
-    print("-" * 55)
-    return 0
     print("-" * 55)
     return 0
 

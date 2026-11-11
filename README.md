@@ -1,281 +1,115 @@
-<div align="center">
-  <img src="assets/hero-banner.svg" alt="MCP Lens — Sovereign Architecture Banner" width="100%" />
-</div>
+# MCP Lens
 
-<br />
+![MCP Lens Hero Banner](assets/hero-banner.svg)
 
-# MCP Lens (⬡)
+**MCP Lens** (`mcp-lens`) is a zero-dependency Python 3.9+ traffic sniffer, BPE token-weight schema auditor, JSON Schema minifier, and web workstation (`127.0.0.1:8109`) for the Model Context Protocol (MCP). It wraps any child MCP stdio process transparently while streaming JSON-RPC 2.0 frames over Server-Sent Events (`/api/events/stream`) for real-time inspection and replay.
 
-> ⚡ **Live Web Application**: [https://mcp-lens.nullai.tech](https://mcp-lens.nullai.tech)  
-> ✦ **100% Free & Open-Access Sovereign Developer Tool**: Zero paywalls, zero license keys, zero gatekeepers.  
-> ☕ **Buy Us a Coffee**: **[Support via Stripe](https://buy.stripe.com/3cIfZg27PdKo2D64Ocfw40X)** | **Solana Tip**: `GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK`  
-
-> **The Zero-Dependency Real-Time Stdio/SSE Traffic Sniffer, Token Weight Auditor, and Visual Playground for the Model Context Protocol (MCP).**
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-gold.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-38BDF8.svg)](https://python.org)
-[![Zero Pip Dependencies](https://img.shields.io/badge/Dependencies-Zero%20Pip-10B981.svg)](#zero-dependencies)
-[![Headless Guardrail](https://img.shields.io/badge/Site%20Guardrail-100%25%20Passed-10B981.svg)](#site-guardrail)
-[![Sovereign Platform](https://img.shields.io/badge/Platform-NullAI%20Tech-D4AF37.svg)](https://nullai.tech)
-
-![MCP Lens OpenGraph Banner](https://mcp-lens.nullai.tech/assets/banner.png)
+- **Zoth Studio v2 Dossier**: [https://zoth.nullai.tech/tools/mcp-lens](https://zoth.nullai.tech/tools/mcp-lens)
+- **Repository**: [https://github.com/1nc0gn30/mcp-lens](https://github.com/1nc0gn30/mcp-lens)
+- **Default Loopback Endpoint**: `http://127.0.0.1:8109`
 
 ---
 
-## 1. Problem & Core Utility
+## Overview
 
-In 2026, autonomous coding agents (Claude Code, Cursor, Antigravity, Windsurf) integrate dozens of external MCP servers. Developers routinely face three critical pain points:
-1. **Opaque Stdio Traffic**: JSON-RPC 2.0 communication flows invisibly over stdin/stdout pipes, making debugging tool failures, schema mismatches, and parsing errors nearly impossible in real-time.
-2. **Context Window Token Bloat**: MCP tool schemas are packed with verbose multi-paragraph docstrings, markdown formatting, and redundant examples. A standard tool suite of 10–20 tools silently consumes **3,000 to 15,000 tokens on every single LLM prompt turn**.
-3. **High-Overhead Tool Testing**: Testing a tool's behavior requires launching an entire IDE session or running heavy multi-gigabyte agent suites.
+Large MCP tool registries can consume thousands of context-window tokens per conversation turn before any tool is called. `mcp-lens` instruments MCP servers without modifying client or server source code:
 
-**MCP Lens completely solves this with zero external pip runtime dependencies:**
-- **Transparent Stdio/SSE Line Pump**: Intercepts and taps JSON-RPC 2.0 frames between the host agent and child MCP process with zero frame alteration and non-blocking line streaming.
-- **BPE Token Weight Auditor & Schema Minifier**: Automatically calculates token weights using calibrated Byte-Pair Encoding heuristics and strips redundant parameter descriptions and examples while strictly preserving argument types and `required` constraints—slashing prompt token overhead by **30% to 45%**.
-- **Interactive Visual Playground**: Serves an avant-garde dark obsidian Web Cockpit at `http://127.0.0.1:8109` with dynamic parameter form generation, simulated tool execution (`tools/call`), and real-time Server-Sent Events (SSE) waterfall streaming.
+- **Transparent Stdio Proxy (`StdioProxy`)**: Wraps any child MCP command (`mcp-lens proxy -- <cmd>`), tapping inbound/outbound newline-delimited JSON-RPC 2.0 frames with zero protocol mutation.
+- **BPE Token Estimator (`MCPTrafficAnalyzer`)**: Computes token overhead across `initialize`, `tools/list`, `tools/call`, `resources/read`, and `prompts/get` payloads.
+- **Lossless Schema Minifier (`SchemaMinifier`)**: Strips redundant schema boilerplate, verbose examples, and bloated property descriptions while preserving JSON Schema structural constraints (`type`, `properties`, `required`, `enum`), quantifying exact token savings.
+- **Interactive Tool Replay (`/api/replay`)**: Test and replay MCP `tools/call` payloads directly from the browser cockpit or REST API.
 
 ---
 
-## 2. Architecture & Data Flow
+## Architecture
 
-```mermaid
-flowchart LR
-    subgraph HostAgent["AI Agent / IDE Client"]
-        A["Claude Code / Cursor / Windsurf"]
-    end
-
-    subgraph MCPLensProxy["MCP Lens Engine (:8109)"]
-        direction TB
-        B["StdioProxy / Line Pump"]
-        C["TrafficStore (Ring Buffer)"]
-        D["BPE Token Auditor & Minifier"]
-        E["ThreadingHTTPServer / SSE Stream"]
-    end
-
-    subgraph ChildServer["Target MCP Server"]
-        F["Child Process (Python / Node.js)"]
-    end
-
-    subgraph BrowserUI["Avant-Garde Web Cockpit"]
-        G["Live Waterfall Table"]
-        H["Interactive Tool Playground"]
-        I["Leaderboard & Minifier AST"]
-    end
-
-    A -- "stdin (JSON-RPC)" --> B
-    B -- "unbuffered pipe" --> F
-    F -- "stdout (JSON-RPC)" --> B
-    B -- "unbuffered pipe" --> A
-    B -. "async tap" .-> C
-    C --> D
-    C --> E
-    E -- "SSE (/api/events/stream)" --> G
-    G <--> H
-    D --> I
-```
-
----
-
-## 3. Quick Start & CLI Reference
-
-### 1-Line Standalone Server
-Launch the Web Cockpit and pre-seeded demonstration sandbox:
-```bash
-./bin/mcp-lens serve --port 8109
-```
-Open **[http://127.0.0.1:8109](http://127.0.0.1:8109)** in your browser.
-
-### Transparent Stdio Sniffing Mode
-Prefix any MCP server command with `mcp-lens --`:
-```bash
-# Python MCP Server
-./bin/mcp-lens -- python my_mcp_server.py
-
-# Node / NPX MCP Server
-./bin/mcp-lens -- npx -y @modelcontextprotocol/server-filesystem /tmp
-
-# Explicit proxy subcommand with custom port
-./bin/mcp-lens proxy --port 8109 -- python sqlite_server.py
-```
-
-### Inspect Metrics & Health
-```bash
-./bin/mcp-lens status --port 8109
-```
-
-Output:
 ```text
- __  __  ____ ____    _     _____ _   _ ____  
-|  \/  |/ ___|  _ \  | |   | ____| \ | / ___| 
-| |\/| | |   | |_) | | |   |  _| |  \| \___ \ 
-| |  | | |___|  __/  | |___| |___| |\  |___) |
-|_|  |_|\____|_|     |_____|_____|_| \_|____/ 
-   Zero-Dependency Model Context Protocol Traffic Sniffer
-   Engineered by 1nc0gn30 (@1nc0gn30) • NullAI Platform
-
-Service Status:       ONLINE (healthy)
-Server Port:          8109
-Engine Uptime:        124.5s
--------------------------------------------------------
-Total Tapped Frames:  42
-Total Bytes Streamed: 28,490 B
-Discovered Tools:     5
-Cumulative Tokens:    8,920
-Token Overhead (Raw): 5,340 tokens
-Minified Potential:   1,920 tokens saved (36.0% reduction)
--------------------------------------------------------
-```
-
-### Run Built-In Self-Diagnostics
-```bash
-./bin/mcp-lens test
+MCP Host Client (Claude Code / Cursor / ZothOS)
+       │  JSON-RPC 2.0 over stdio
+       ▼
+  mcp-lens StdioProxy ──► POST /api/frame ──► MCPLensServer (127.0.0.1:8109)
+       │                                           ├── TrafficStore ring buffer
+       ▼                                           ├── MCPTrafficAnalyzer + SchemaMinifier
+  Child MCP Server                                 └── SSE /api/events/stream + Web UI
 ```
 
 ---
 
-## 4. IDE & Agent Integration Recipes
+## Quickstart
 
-### Claude Code (Anthropic CLI)
-Wrap your MCP server directly:
 ```bash
-claude mcp add db-server -- ~/NullAITech/mcp-lens/bin/mcp-lens -- python /path/to/server.py
+git clone https://github.com/1nc0gn30/mcp-lens.git
+cd mcp-lens
+python3 -m pip install -e .
+
+# Launch the Web Cockpit & Telemetry Server on 127.0.0.1:8109
+mcp-lens serve --host 127.0.0.1 --port 8109
 ```
 
-### Cursor (`~/.cursor/settings.json` or `.cursor/mcp.json`)
-```json
-{
-  "mcpServers": {
-    "filesystem-proxied": {
-      "command": "~/NullAITech/mcp-lens/bin/mcp-lens",
-      "args": ["--", "npx", "-y", "@modelcontextprotocol/server-filesystem", "/tmp"]
-    }
-  }
-}
+Or run directly from the repository checkout:
+
+```bash
+python3 server.py serve --port 8109
 ```
 
-### Windsurf & Antigravity IDE
-Configure standard stdio command:
+Open `http://127.0.0.1:8109` in your browser.
+
+---
+
+## CLI & ZothOS v3.4.0 Integration
+
+`mcp-lens` supports standalone server mode, transparent stdio proxying, health telemetry, and built-in self-diagnostics:
+
 ```bash
-~/NullAITech/mcp-lens/bin/mcp-lens proxy --port 8109 -- npx -y @modelcontextprotocol/server-memory
+# Wrap a child MCP server and stream frames to 127.0.0.1:8109
+mcp-lens proxy --port 8109 -- npx -y @modelcontextprotocol/server-filesystem /tmp
+
+# Shorthand proxy invocation (headless stdio only, no HTTP server)
+mcp-lens --no-server -- python3 my_mcp_server.py
+
+# Inspect live daemon status and token savings
+mcp-lens --status
+mcp-lens --json
+mcp-lens status --port 8109 --json
+
+# Run built-in JSON-RPC parser, token estimator, and schema minifier self-tests
+mcp-lens test
 ```
 
 ---
 
-## 5. REST & SSE API Endpoints (Port 8109)
+## REST API Reference
+
+Mutating `POST` routes enforce local-origin validation (`127.0.0.1`, `localhost`, `[::1]`, or non-browser CLI callers).
 
 | Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/health` | Health check probe and service metadata. |
-| `GET` | `/api/stats` | Operational metrics: total frames, raw tokens, minified savings. |
-| `GET` | `/api/traffic` | Waterfall JSON-RPC frames with optional `?limit=N` and `?topic=X`. |
-| `GET` | `/api/tools` | Discovered tool definitions with full token weight breakdowns. |
-| `POST` | `/api/minify` | AST minification endpoint: accepts raw schema, returns compressed schema. |
-| `POST` | `/api/replay` | Sandbox execution simulator: dispatches `tools/call` and benchmarks latency. |
-| `POST` | `/api/frame` | External frame ingestion from remote proxy nodes. |
-| `GET` | `/api/events/stream` | Server-Sent Events (SSE) live push stream for real-time waterfall updates. |
-
----
-
-## 6. Zero Dependencies Guarantee
-
-MCP Lens is engineered strictly with the **Python 3.10+ standard library**:
-- `http.server` & `socketserver` (multi-threaded concurrent HTTP/SSE daemon)
-- `subprocess` & `threading` (non-blocking stdio line pumps)
-- `collections.deque` (lock-guarded thread-safe ring buffer)
-- `json`, `dataclasses`, `re`, `urllib` (BPE heuristic AST analysis & REST API)
-
-Zero external pip packages are required to run, proxy, or serve.
-
----
-
-## 7. Automated Headless Guardrail Audit
-
-MCP Lens satisfies the sovereign production guardrail invariants across mobile, tablet, and desktop viewports:
-
-```text
-=============================================================
-🛡️  SOVEREIGN SITE GUARDRAIL AUDIT: PASSED ✅
-=============================================================
-Target: http://127.0.0.1:8109
-
-1. AEO & SEO Schema.org Graph:
-   ✓ Schema.org JSON-LD parses cleanly.
-   ✓ WebApplication/SoftwareApplication schema declared.
-   ✓ FAQPage schema declared for Answer Engine Optimization (Perplexity/Google SGE).
-2. Robots.txt & Sitemap:
-   ✓ robots.txt welcomes crawlers.
-   ✓ robots.txt references sitemap.xml.
-   ✓ sitemap.xml present.
-3. Netlify Configuration & Redirects:
-   ✓ netlify.toml defines publish directory.
-   ✓ netlify.toml defines security headers.
-   ✓ SPA catch-all redirect configured.
-4. Media Alt Text & Accessibility:
-   ✓ 100% of images have descriptive alt text (0 images verified).
-5. Social Meta Images:
-   ✓ og:image declared: https://mcp-lens.nullai.tech/assets/banner.png
-   ✓ twitter:image declared: https://mcp-lens.nullai.tech/assets/banner.png
-6. Triple-Viewport Responsiveness:
-   Mobile (375px):    ✓ PASS (No overflow)
-   Tablet (768px):    ✓ PASS (No overflow)
-   Desktop (1440px):  ✓ PASS (No overflow)
-7. Tag Integrity & Zero Console Errors:
-   ✓ Page populated with 36 interactive buttons and valid DOM.
-   Console Errors: ✓ 0 runtime console errors
-=============================================================
-```
-
----
-
-## 8. 100% Free & Open-Access Architecture (Zero Paywalls)
-
-Every capability of MCP Lens is completely unlocked, free, and open by default:
-- **Zero Paywalls**: No license modals, no blurred text, no forced paywall gates, and zero action interceptors.
-- **Full Utility**: Real-time stdio/SSE sniffer, schema minifier, token auditor, and interactive playground run 100% locally and in-browser.
-- **Voluntary Coffee & Tips**:
-  - **Stripe Buy Us a Coffee**: [https://buy.stripe.com/3cIfZg27PdKo2D64Ocfw40X](https://buy.stripe.com/3cIfZg27PdKo2D64Ocfw40X)
-  - **Solana Tip Address**: `GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK` (`solana:GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK`)
-
----
-
-## 9. Attribution & License
-
-- **Engineered by**: [1nc0gn30 • NullAI](https://nullai.tech) ([@1nc0gn30](https://github.com/1nc0gn30)) • [NullAI Platform](https://nullai.tech)
-- **License**: [MIT](LICENSE)
-
-## Network exposure
-
-The server binds to `127.0.0.1` by default. To reach it from other devices,
-opt in explicitly with `--host 0.0.0.0` (or set `ZOTH_BIND_HOST=0.0.0.0`; an IP
-in `HOST` is also honoured, a plain hostname is ignored) and only on a trusted
-network.
-
-Browser requests are only accepted from `localhost` / `127.0.0.1` pages:
-cross-site POSTs get `403` and CORS never answers `*`, so a website you visit
-can't drive this local server. CLI and agent clients are unaffected.
-
----
-
-## 🏛️ ZothOS v3.4, Zoth Studio v2 & Obsidian Second Brain Ecosystem
-
-### Cross-Surface Integration Matrix
-
-| Surface | Endpoint / Binary | Capabilities |
 | :--- | :--- | :--- |
-| **Standalone Workstation** | `http://127.0.0.1:8109` | 100% Free & Open-Access Web Deck, live `/health` & REST telemetry |
-| **Zoth Studio v2 Route** | `http://127.0.0.1:3000/tools/mcp-lens` | Interactive God-Mode component inside Zoth Studio (`https://zoth.nullai.tech`) |
-| **ZothOS v3.4 CLI & TUI** | `mcp-lens` / `mcp-lens-tui` | Global binary in `/usr/local/bin/` with Unicode `U+2800` Braille TUI & `--json` output |
-| **ZothOS-Lite Web Desktop** | `http://127.0.0.1:8145` | Browser-native KDE-style window manager & terminal launcher |
-| **Zoth Obsidian Tracker** | `http://127.0.0.1:8151` | Interactive Obsidian Second Brain vault explorer (`~/Documents/Obsidian Vault/Studio/Tools/Studio mcp-lens.md`) |
-| **Neuro-Memory STDP Cortex** | `http://127.0.0.1:8094` | 3-Factor STDP synaptic memory daemon & 21-tool MCP server |
+| `GET` | `/` | Web cockpit (`public/index.html`) |
+| `GET` | `/health`, `/api/health` | Service health and uptime in seconds |
+| `GET` | `/api/stats` | Frame count, bytes streamed, discovered tools, raw token overhead, and minification savings |
+| `GET` | `/api/traffic?limit=100&topic=tools/call` | Recent captured JSON-RPC 2.0 frames with optional method filter |
+| `GET` | `/api/tools` | Per-tool token audit (`total_tokens_raw`, `total_tokens_saved`, `overall_savings_percent`) |
+| `GET` | `/api/events/stream` | Real-time Server-Sent Events (SSE) frame stream |
+| `POST` | `/api/minify` | Minify an MCP tool JSON schema (`{"tool": {...}}`) and return token delta |
+| `POST` | `/api/replay` | Replay/simulate a `tools/call` invocation (`{"tool_name": "...", "arguments": {...}}`) |
+| `POST` | `/api/frame` | Ingest a tapped JSON-RPC frame (`{"direction": "inbound", "raw_line": "..."}`) |
+
+---
+
+## Testing & Verification
 
 ```bash
-# Inspect CLI & Unicode U+2800 Braille TUI on ZothOS v3.4
-mcp-lens --help
-mcp-lens-tui --status
-mcp-lens-tui --json
-
-# Verify Second Brain Vault & 12-Step Verification Gallery on :8151
-zoth-obsidian-tracker --verify
+PYTHONPATH=src python3 -m pytest -q
+./bin/mcp-lens --help
+./bin/mcp-lens test
+./bin/mcp-lens --json
 ```
 
+---
+
+## Support & License
+
+100% free and open-source software under the MIT License.
+
+- Optional support: [Buy Us a Coffee via Stripe](https://buy.stripe.com/3cIfZg27PdKo2D64Ocfw40X)
+- Engineered by **1nc0gn30** (`@1nc0gn30`, [https://1nc0gn30.si](https://1nc0gn30.si)) • **NullAI** ([https://nullai.tech](https://nullai.tech))

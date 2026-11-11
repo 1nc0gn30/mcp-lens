@@ -47,12 +47,6 @@ main p {
 #tool-savings-pct,
 #waterfall-body td,
 #auditor-table-body td,
-#salesBanner,
-#salesBanner span,
-#paywall-modal,
-.btn-depay-trigger,
-#btn-depay-solana,
-#btn-depay-modal,
 #licenseBadge {
   font-variant-numeric: tabular-nums lining-nums;
   font-feature-settings: "tnum" 1, "lnum" 1;
