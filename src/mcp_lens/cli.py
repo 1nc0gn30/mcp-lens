@@ -132,7 +132,10 @@ def cmd_status(args: argparse.Namespace) -> int:
                 "stripe": "https://buy.stripe.com/3cIfZg27PdKo2D64Ocfw40X"
             }
         }, indent=2))
-        return 0 if online else 1
+        # --json is a machine-readable contract: JSON was produced successfully,
+        # so exit 0 even when the local service is offline (offline is reported
+        # in the payload). Human --status still exits 1 when offline.
+        return 0
 
     if not online:
         print(f"Error: Could not connect to MCP Lens server at http://{host}:{port} ({health.get('error')})")
