@@ -307,20 +307,15 @@
     elRawSchemaView = document.getElementById("raw-schema-code");
     elMinSchemaView = document.getElementById("min-schema-code");
     elAuditorTableBody = document.getElementById("auditor-table-body");
-    elModalPaywall = document.getElementById("paywall-modal") || document.getElementById("pro-paywall-modal");
     elModalFrameDetail = document.getElementById("frame-detail-modal");
     elFrameJsonContent = document.getElementById("frame-raw-json");
     elFrameMetaContent = document.getElementById("frame-meta-tags");
-    elLicenseKeyInput = document.getElementById("licenseKeyInput") || document.getElementById("license-key-input") || document.getElementById("input-license-key");
-    elProBadge = document.getElementById("licenseBadge") || document.getElementById("pro-badge") || document.getElementById("header-pro-badge");
+    elProBadge = document.getElementById("licenseBadge");
   }
 
-  // 1. License & Paywall Engine — 100% Free & Open Access Invariant
+  // 1. Open-Access Status — 100% Free & Open Access Invariant
   function checkLicenseStatus() {
     state.isPro = true;
-    localStorage.setItem("mcp_lens_pro", "active");
-    localStorage.setItem("zoth_mcp_lens_licensed", "true");
-    localStorage.setItem("pro_licensed", "true");
     unlockProFeatures();
   }
 
@@ -330,51 +325,7 @@
       badge.textContent = "✦ 100% OPEN ACCESS";
       badge.className = "px-2 sm:px-2.5 py-1 rounded text-[11px] sm:text-xs font-mono font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/60 shadow-lg shadow-emerald-500/20";
     }
-    const legacyBadge = document.getElementById("header-pro-badge");
-    if (legacyBadge && legacyBadge !== badge) {
-      legacyBadge.textContent = "✦ 100% OPEN ACCESS";
-    }
-
-    // Remove frosted blur from paywalled sections
-    document.querySelectorAll(".pro-blur-overlay").forEach((el) => {
-      el.classList.remove("pro-blur-overlay");
-    });
-    document.querySelectorAll(".pro-lock-gate, #schema-paywall-overlay").forEach((el) => {
-      el.style.display = "none";
-    });
-    const banner = document.getElementById("salesBanner") || document.getElementById("sales-banner");
-    if (banner) {
-      banner.style.display = "none";
-    }
-
-    const headerKeyBtn = document.getElementById("btn-header-key");
-    if (headerKeyBtn) {
-      headerKeyBtn.textContent = "☕ Buy Us a Coffee";
-      headerKeyBtn.onclick = function() {
-        window.open("https://buy.stripe.com/3cIfZg27PdKo2D64Ocfw40X", "_blank");
-      };
-    }
-
-    localStorage.setItem("mcp_lens_pro", "active");
-    localStorage.setItem("zoth_mcp_lens_licensed", "true");
-    localStorage.setItem("pro_licensed", "true");
   }
-
-  window.activateLicenseKey = function (key) {
-    unlockProFeatures();
-    showNotification("✓ All features 100% free & open-access.");
-  };
-
-  window.openPaywallModal = function (featureName) {
-    // 100% Free & Open-Access — No paywalls
-  };
-
-  window.closePaywallModal = function () {
-    if (elModalPaywall) {
-      elModalPaywall.classList.add("hidden");
-      elModalPaywall.classList.remove("flex");
-    }
-  };
 
   window.interceptProAction = function (actionName, callback) {
     if (typeof callback === "function") callback();
