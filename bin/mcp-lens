@@ -4,6 +4,16 @@
 Engineered by 1nc0gn30 (@1nc0gn30) • NullAI Platform.
 """
 
+# zothos-repo-shim: run the canonical repo copy so repo-relative paths resolve
+import os as _os, sys as _sys
+_here = _os.path.realpath(__file__)
+_repo = _os.environ.get("ZOTH_REPO_DIR") or '/home/zoth/NullAITech' + "/" + 'mcp-lens'
+_real = _os.path.join(_repo, "bin", 'mcp-lens')
+if _os.path.exists(_real) and _os.path.realpath(_real) != _here:
+    _os.execv(_sys.executable, [_sys.executable, _real] + _sys.argv[1:])
+del _os, _sys, _here, _repo, _real
+
+
 import os
 import sys
 
