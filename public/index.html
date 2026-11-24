@@ -262,7 +262,7 @@
             <span class="text-zinc-500">$</span>
             <span class="select-all">mcp-lens -- python my_mcp_server.py</span>
           </div>
-          <button onclick="navigator.clipboard.writeText('mcp-lens -- python my_mcp_server.py')" class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 text-xs font-mono transition" aria-label="Copy CLI snippet">
+          <button onclick="if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText('mcp-lens -- python my_mcp_server.py').catch(function(){});}" class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 text-xs font-mono transition" aria-label="Copy CLI snippet">
             Copy
           </button>
         </div>
@@ -566,7 +566,7 @@
           <div class="bg-zinc-950 p-4 rounded-lg border border-zinc-800 space-y-2">
             <div class="flex items-center justify-between">
               <span class="text-xs font-mono font-semibold text-cyan-300">Claude Code (CLI)</span>
-              <button onclick="navigator.clipboard.writeText('claude mcp add my-tool -- mcp-lens -- python /path/to/server.py')" class="text-[11px] font-mono text-zinc-400 hover:text-white" aria-label="Copy Claude Code recipe">Copy</button>
+              <button onclick="if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText('claude mcp add my-tool -- mcp-lens -- python /path/to/server.py').catch(function(){});}" class="text-[11px] font-mono text-zinc-400 hover:text-white" aria-label="Copy Claude Code recipe">Copy</button>
             </div>
             <pre class="text-xs font-mono text-zinc-300 overflow-x-auto">claude mcp add my-tool -- mcp-lens -- python /path/to/server.py</pre>
           </div>
@@ -575,7 +575,7 @@
           <div class="bg-zinc-950 p-4 rounded-lg border border-zinc-800 space-y-2">
             <div class="flex items-center justify-between">
               <span class="text-xs font-mono font-semibold text-purple-300">Cursor (settings.json)</span>
-              <button onclick="navigator.clipboard.writeText('{\n  &quot;mcpServers&quot;: {\n    &quot;proxied-tool&quot;: {\n      &quot;command&quot;: &quot;mcp-lens&quot;,\n      &quot;args&quot;: [&quot;--&quot;, &quot;node&quot;, &quot;/path/to/server.js&quot;]\n    }\n  }\n}')" class="text-[11px] font-mono text-zinc-400 hover:text-white" aria-label="Copy Cursor JSON recipe">Copy JSON</button>
+              <button onclick="if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText('{\n  &quot;mcpServers&quot;: {\n    &quot;proxied-tool&quot;: {\n      &quot;command&quot;: &quot;mcp-lens&quot;,\n      &quot;args&quot;: [&quot;--&quot;, &quot;node&quot;, &quot;/path/to/server.js&quot;]\n    }\n  }\n}').catch(function(){});}" class="text-[11px] font-mono text-zinc-400 hover:text-white" aria-label="Copy Cursor JSON recipe">Copy JSON</button>
             </div>
             <pre class="text-xs font-mono text-zinc-300 overflow-x-auto">{
   "mcpServers": {
@@ -591,7 +591,7 @@
           <div class="bg-zinc-950 p-4 rounded-lg border border-zinc-800 space-y-2">
             <div class="flex items-center justify-between">
               <span class="text-xs font-mono font-semibold text-emerald-300">Antigravity / Windsurf Stdio Command</span>
-              <button onclick="navigator.clipboard.writeText('mcp-lens proxy --port 8109 -- npx -y @modelcontextprotocol/server-filesystem /tmp')" class="text-[11px] font-mono text-zinc-400 hover:text-white" aria-label="Copy Antigravity recipe">Copy</button>
+              <button onclick="if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText('mcp-lens proxy --port 8109 -- npx -y @modelcontextprotocol/server-filesystem /tmp').catch(function(){});}" class="text-[11px] font-mono text-zinc-400 hover:text-white" aria-label="Copy Antigravity recipe">Copy</button>
             </div>
             <pre class="text-xs font-mono text-zinc-300 overflow-x-auto">mcp-lens proxy --port 8109 -- npx -y @modelcontextprotocol/server-filesystem /tmp</pre>
           </div>

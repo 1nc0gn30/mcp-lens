@@ -562,9 +562,15 @@
   window.copyFrameJson = function () {
     if (!state.selectedFrame) return;
     const txt = elFrameJsonContent ? elFrameJsonContent.textContent : state.selectedFrame.raw_payload;
-    navigator.clipboard.writeText(txt).then(() => {
-      showNotification("✓ Frame JSON copied to clipboard");
-    });
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(() => {
+        showNotification("✓ Frame JSON copied to clipboard");
+      }).catch(() => {
+        showNotification("✓ Frame JSON ready to copy");
+      });
+    } else {
+      showNotification("✓ Frame JSON ready to copy");
+    }
   };
 
   // 5. Tool Playground & Schema Minifier
@@ -727,6 +733,7 @@
       showNotification(`✓ Tool ${state.selectedToolName} executed successfully!`);
     }, 450);
   };
+  window.executeSimulatedTool = window.executeToolSimulation;
 
   // 6. Token Weight Auditor Leaderboard
   function renderAuditorTable(data) {
@@ -820,9 +827,15 @@
         prompt += `${t.minified_schema.description || ""}\n`;
         prompt += `Parameters: ${JSON.stringify(t.minified_schema.inputSchema || t.minified_schema.parameters || {})}\n\n`;
       });
-      navigator.clipboard.writeText(prompt).then(() => {
-        showNotification("✓ Optimized MCP Tool Prompt copied to clipboard!");
-      });
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(prompt).then(() => {
+          showNotification("✓ Optimized MCP Tool Prompt copied to clipboard!");
+        }).catch(() => {
+          showNotification("✓ Optimized MCP Tool Prompt generated!");
+        });
+      } else {
+        showNotification("✓ Optimized MCP Tool Prompt generated!");
+      }
     });
   };
 
