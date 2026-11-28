@@ -1,21 +1,24 @@
 """Command-Line Interface for MCP Lens.
 
-Engineered by 1nc0gn30 (@1nc0gn30) • NullAI Platform.
+Engineered by Neal Frazier Tech (@1nc0gn30) • NullAI Platform.
 100% Python Standard Library — Zero External Dependencies.
 """
 
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import os
+import shutil
+import subprocess
 import sys
-import time
-import urllib.error
 import urllib.request
 from typing import List, Optional
 
+from . import __version__
 from .analyzer import MCPTrafficAnalyzer, SchemaMinifier
+from .mcp_server import run_mcp_stdio_server
 from .proxy import GLOBAL_TRAFFIC, StdioProxy
 from .server import MCPLensServer
 
@@ -23,7 +26,6 @@ from .server import MCPLensServer
 def _default_bind_host() -> str:
     """Bind address: localhost unless explicitly opted in via $ZOTH_BIND_HOST or
     $HOST (IP literal only; zsh sets HOST to the hostname) or --host."""
-    import ipaddress, os
     for var in ("ZOTH_BIND_HOST", "HOST"):
         val = os.environ.get(var, "").strip()
         if val == "localhost":
@@ -37,16 +39,20 @@ def _default_bind_host() -> str:
     return "127.0.0.1"
 
 
-
-BANNER = r"""
- __  __  ____ ____    _     _____ _   _ ____  
-|  \/  |/ ___|  _ \  | |   | ____| \ | / ___| 
-| |\/| | |   | |_) | | |   |  _| |  \| \___ \ 
-| |  | | |___|  __/  | |___| |___| |\  |___) |
-|_|  |_|\____|_|     |_____|_____|_| \_|____/ 
-   Zero-Dependency Model Context Protocol Traffic Sniffer
-   Engineered by 1nc0gn30 (@1nc0gn30) • NullAI Platform
+BANNER = f"""
+ __  __  ____ ____    _     _____ _   _ ____
+|  \\/  |/ ___|  _ \\  | |   | ____| \\ | / ___|
+| |\\/| | |   | |_) | | |   |  _| |  \\| \\___ \\
+| |  | | |___|  __/  | |___| |___| |\\  |___) |
+|_|  |_|\\____|_|     |_____|_____|_| \\_|____/
+   Zero-Dependency Model Context Protocol Traffic Sniffer (v{__version__})
+   Engineered by Neal Frazier Tech (@1nc0gn30) • NullAI Platform
 """
+
+
+def _resolve_project_root() -> str:
+    pkg_dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.dirname(os.path.dirname(pkg_dir))
 
 
 def cmd_serve(args: argparse.Namespace) -> int:
@@ -72,7 +78,6 @@ def cmd_proxy(args: argparse.Namespace, child_cmd: List[str]) -> int:
 
     server: Optional[MCPLensServer] = None
     if not args.no_server:
-        # Start server in background thread so cockpit is immediately accessible
         server = MCPLensServer(host=args.host, port=args.port)
         server.start(block=False)
         sys.stderr.write(f"[mcp-lens] Web Cockpit active at http://{args.host}:{args.port}\n")
@@ -81,10 +86,12 @@ def cmd_proxy(args: argparse.Namespace, child_cmd: List[str]) -> int:
     sys.stderr.write(f"[mcp-lens] Proxying stdio for: {' '.join(child_cmd)}\n")
     sys.stderr.flush()
 
+    # When running embedded server, GLOBAL_TRAFFIC is shared in-process; do not
+    # double-record by POSTing back to the same process's /api/frame endpoint.
     proxy = StdioProxy(
         command=child_cmd,
-        traffic_store=GLOBAL_TRAFFIC,
-        remote_collector_url=f"http://127.0.0.1:{args.port}/api/frame" if not args.no_server else None,
+        traffic_store=GLOBAL_TRAFFIC if not args.no_server else None,
+        remote_collector_url=f"http://127.0.0.1:{args.port}/api/frame" if args.no_server else None,
     )
     code = proxy.start()
 
@@ -121,20 +128,19 @@ def cmd_status(args: argparse.Namespace) -> int:
     if getattr(args, "json", False):
         print(json.dumps({
             "service": "mcp-lens",
-            "version": "2.5.0",
+            "version": __version__,
             "online": online,
             "port": port,
             "host": host,
             "health": health,
             "stats": stats,
             "license": "100% Free & Open Access (Zero Paywalls)",
+            "author": "Neal Frazier Tech (@1nc0gn30) • NullAI Platform",
             "support": {
-                "stripe": "https://buy.stripe.com/3cIfZg27PdKo2D64Ocfw40X"
-            }
+                "stripe": "https://buy.stripe.com/3cIfZg27PdKo2D64Ocfw40X",
+                "solana": "GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK",
+            },
         }, indent=2))
-        # --json is a machine-readable contract: JSON was produced successfully,
-        # so exit 0 even when the local service is offline (offline is reported
-        # in the payload). Human --status still exits 1 when offline.
         return 0
 
     if not online:
@@ -144,11 +150,12 @@ def cmd_status(args: argparse.Namespace) -> int:
     print(BANNER)
     print(f"Service Status:       ONLINE ({health.get('status')})")
     print(f"Server Port:          {port}")
+    print(f"Engine Version:       {health.get('version', __version__)}")
     print(f"Engine Uptime:        {health.get('uptime_seconds')}s")
     print("-" * 55)
     print(f"Total Tapped Frames:  {stats.get('total_frames', 0):,}")
     print(f"Total Bytes Streamed: {stats.get('total_bytes', 0):,} B")
-    print(f"Discovered Tools:     {len(stats.get('tools', []))}")
+    print(f"Discovered Tools:     {stats.get('discovered_tools_count', 0)}")
     print(f"Cumulative Tokens:    {stats.get('total_tokens', 0):,}")
     print(f"Token Overhead (Raw): {stats.get('token_overhead', 0):,} tokens")
     print(f"Minified Potential:   {stats.get('potential_savings_tokens', 0):,} tokens saved ({stats.get('savings_percent', 0)}% reduction)")
@@ -156,24 +163,79 @@ def cmd_status(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_test(args: argparse.Namespace) -> int:
-    """Run internal self-tests for token calculations, minifier, and parser."""
-    print("● Running MCP Lens internal diagnostics...")
+def cmd_desktop(args: argparse.Namespace) -> int:
+    """Launch MCP Lens desktop workstation (Electron wrapper or local browser)."""
+    root = _resolve_project_root()
+    electron_main = os.path.join(root, "electron", "main.cjs")
+    electron_bin = shutil.which("electron")
+    url = f"http://{args.host}:{args.port}"
 
-    # Test 1: Parser
+    if getattr(args, "dry_run", False):
+        mode = "electron" if (electron_bin and os.path.isfile(electron_main)) else "browser"
+        print(json.dumps({
+            "service": "mcp-lens",
+            "version": __version__,
+            "mode": mode,
+            "url": url,
+            "electron_available": bool(electron_bin and os.path.isfile(electron_main)),
+        }, indent=2))
+        return 0
+
+    if electron_bin and os.path.isfile(electron_main) and (os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")):
+        env = os.environ.copy()
+        env["PORT"] = str(args.port)
+        return subprocess.call([electron_bin, electron_main], cwd=root, env=env)
+
+    # Headless or no Electron binary: ensure server is reachable or start it
+    try:
+        with urllib.request.urlopen(f"{url}/health", timeout=0.8):
+            online = True
+    except Exception:
+        online = False
+
+    if not online:
+        server = MCPLensServer(host=args.host, port=args.port)
+        if os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"):
+            server.start(block=False)
+            opener = shutil.which("xdg-open")
+            if opener:
+                subprocess.Popen([opener, url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            try:
+                server.thread.join()  # type: ignore[union-attr]
+            except KeyboardInterrupt:
+                server.stop()
+            return 0
+        server.start(block=True)
+        return 0
+
+    opener = shutil.which("xdg-open")
+    if opener and (os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")):
+        subprocess.Popen([opener, url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    else:
+        print(f"● MCP Lens Web Cockpit ready at {url}")
+    return 0
+
+
+def cmd_mcp(_args: argparse.Namespace) -> int:
+    """Run the real stdio JSON-RPC 2.0 MCP server (6 tools)."""
+    return run_mcp_stdio_server()
+
+
+def cmd_test(_args: argparse.Namespace) -> int:
+    """Run internal self-tests for token calculations, minifier, and parser."""
+    print(f"● Running MCP Lens v{__version__} internal diagnostics...")
+
     sample_rpc = '{"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {}}'
     parsed = MCPTrafficAnalyzer.parse_frame(sample_rpc)
     assert parsed is not None, "Failed to parse valid JSON-RPC frame"
     assert parsed.get("method") == "tools/list", "Method mismatch"
     print("  ✓ JSON-RPC 2.0 framing parser verified")
 
-    # Test 2: BPE Token Estimator
     text = "SELECT * FROM users WHERE active = 1;"
     tokens = MCPTrafficAnalyzer.estimate_tokens(text)
     assert tokens > 0, "Token count must be positive"
     print(f"  ✓ BPE Token Heuristic verified ({len(text)} chars -> ~{tokens} tokens)")
 
-    # Test 3: Minifier
     tool = {
         "name": "read_file",
         "description": "Reads entire file contents and returns markdown text.",
@@ -183,11 +245,11 @@ def cmd_test(args: argparse.Namespace) -> int:
                 "path": {
                     "type": "string",
                     "description": "The exact absolute path on filesystem.",
-                    "examples": ["/var/log/syslog"]
+                    "examples": ["/var/log/syslog"],
                 }
             },
-            "required": ["path"]
-        }
+            "required": ["path"],
+        },
     }
     raw_tokens = MCPTrafficAnalyzer.estimate_tokens(tool)
     minified = SchemaMinifier.minify_tool_schema(tool)
@@ -211,9 +273,13 @@ def main(argv: Optional[List[str]] = None) -> int:
         pre_args = argv[:split_idx]
         post_args = argv[split_idx + 1 :]
 
+        # If subcommand is explicitly 'proxy', strip it from pre_args
+        if pre_args and pre_args[0] == "proxy":
+            pre_args = pre_args[1:]
+
         parser = argparse.ArgumentParser(description="MCP Lens - Zero-Dependency Model Context Protocol Traffic Sniffer")
         parser.add_argument("--port", type=int, default=8109, help="Web Cockpit port (default: 8109)")
-        parser.add_argument("--host", default=_default_bind_host(), help="Host interface (default: 127.0.0.1 or $ZOTH_BIND_HOST; use 0.0.0.0 only on trusted networks)")
+        parser.add_argument("--host", default=_default_bind_host(), help="Host interface (default: 127.0.0.1 or $ZOTH_BIND_HOST)")
         parser.add_argument("--no-server", action="store_true", help="Disable embedded Web Cockpit HTTP server")
         parsed = parser.parse_args(pre_args)
         return cmd_proxy(parsed, post_args)
@@ -225,13 +291,15 @@ def main(argv: Optional[List[str]] = None) -> int:
         epilog="""
 Examples:
   mcp-lens serve --port 8109
-  mcp-lens proxy -- python my_mcp_server.py
+  mcp-lens proxy -- python3 my_mcp_server.py
   mcp-lens -- npx -y @modelcontextprotocol/server-filesystem /tmp
-  mcp-lens status --port 8109
+  mcp-lens mcp
+  mcp-lens desktop
+  mcp-lens status --port 8109 --json
   mcp-lens test
-        """
+        """,
     )
-    parser.add_argument("-v", "--version", action="version", version="mcp-lens 2.5.0")
+    parser.add_argument("-v", "--version", action="version", version=f"mcp-lens {__version__}")
     parser.add_argument("--status", action="store_true", help="Query status of local MCP Lens instance")
     parser.add_argument("--json", action="store_true", help="Output status/telemetry in structured JSON")
     parser.add_argument("--port", type=int, default=8109, help="Server port (default: 8109)")
@@ -239,46 +307,53 @@ Examples:
 
     subparsers = parser.add_subparsers(dest="subcommand", help="Available subcommands")
 
-    # serve
     p_serve = subparsers.add_parser("serve", help="Run the Web Cockpit and Telemetry server")
     p_serve.add_argument("--port", type=int, default=8109, help="Port to bind (default: 8109)")
-    p_serve.add_argument("--host", default=_default_bind_host(), help="Host interface (default: 127.0.0.1 or $ZOTH_BIND_HOST; use 0.0.0.0 only on trusted networks)")
+    p_serve.add_argument("--host", default=_default_bind_host(), help="Host interface (default: 127.0.0.1 or $ZOTH_BIND_HOST)")
 
-    # proxy
     p_proxy = subparsers.add_parser("proxy", help="Transparently proxy stdio for a child MCP server")
     p_proxy.add_argument("--port", type=int, default=8109, help="Web Cockpit port (default: 8109)")
-    p_proxy.add_argument("--host", default=_default_bind_host(), help="Host interface (default: 127.0.0.1 or $ZOTH_BIND_HOST; use 0.0.0.0 only on trusted networks)")
+    p_proxy.add_argument("--host", default=_default_bind_host(), help="Host interface (default: 127.0.0.1 or $ZOTH_BIND_HOST)")
     p_proxy.add_argument("--no-server", action="store_true", help="Disable embedded Web Cockpit HTTP server")
     p_proxy.add_argument("cmd", nargs=argparse.REMAINDER, help="Child MCP server command and arguments")
 
-    # status
     p_status = subparsers.add_parser("status", help="Inspect status and metrics of running MCP Lens")
     p_status.add_argument("--port", type=int, default=8109, help="Server port (default: 8109)")
     p_status.add_argument("--host", default="127.0.0.1", help="Server host (default: 127.0.0.1)")
     p_status.add_argument("--json", action="store_true", help="Output status in structured JSON format")
 
-    # test
-    p_test = subparsers.add_parser("test", help="Execute internal diagnostics and schema self-tests")
+    subparsers.add_parser("mcp", help="Run stdio JSON-RPC 2.0 MCP server (6 tools)")
+
+    p_desktop = subparsers.add_parser("desktop", help="Launch MCP Lens desktop workstation")
+    p_desktop.add_argument("--port", type=int, default=8109, help="Server port (default: 8109)")
+    p_desktop.add_argument("--host", default="127.0.0.1", help="Server host (default: 127.0.0.1)")
+    p_desktop.add_argument("--dry-run", action="store_true", help="Print resolved launch mode JSON and exit")
+
+    subparsers.add_parser("test", help="Execute internal diagnostics and schema self-tests")
 
     args = parser.parse_args(argv)
 
-    if getattr(args, "status", False) or getattr(args, "json", False) and not args.subcommand:
+    if (getattr(args, "status", False) or getattr(args, "json", False)) and not args.subcommand:
         return cmd_status(args)
 
     if args.subcommand == "serve":
         return cmd_serve(args)
-    elif args.subcommand == "proxy":
+    if args.subcommand == "proxy":
         child_cmd = args.cmd
         if child_cmd and child_cmd[0] == "--":
             child_cmd = child_cmd[1:]
         return cmd_proxy(args, child_cmd)
-    elif args.subcommand == "status":
+    if args.subcommand == "status":
         return cmd_status(args)
-    elif args.subcommand == "test":
+    if args.subcommand == "mcp":
+        return cmd_mcp(args)
+    if args.subcommand == "desktop":
+        return cmd_desktop(args)
+    if args.subcommand == "test":
         return cmd_test(args)
-    else:
-        parser.print_help()
-        return 0
+
+    parser.print_help()
+    return 0
 
 
 if __name__ == "__main__":

@@ -1,0 +1,20 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=MCP Lens
+Comment=Zero-dependency Python 3.10+ stdio/SSE traffic sniffer, BPE token weight auditor, schema minifier, and 6-tool stdio MCP server.
+Exec=/usr/local/bin/mcp-lens desktop
+TryExec=/usr/local/bin/mcp-lens
+Icon=mcp-lens
+Terminal=false
+Categories=X-Zoth-Dev;Development;Utility;ArtificialIntelligence;
+StartupNotify=true
+Actions=TUI;WebApp;
+
+[Desktop Action TUI]
+Name=Launch MCP Lens Braille TUI
+Exec=/usr/local/bin/zoth-konsole --title "MCP Lens TUI" -- /usr/local/bin/mcp-lens-tui
+
+[Desktop Action WebApp]
+Name=Open Local Web Workstation (:8109)
+Exec=xdg-open http://127.0.0.1:8109

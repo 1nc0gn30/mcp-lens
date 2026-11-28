@@ -1,0 +1,21 @@
+[Unit]
+Description=ZothOS MCP Lens - Model Context Protocol Traffic Sniffer & Token Weight Auditor
+After=network.target multi-user.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=zoth
+EnvironmentFile=-/etc/zothos/paths.conf
+WorkingDirectory=%h
+ExecStart=/usr/local/bin/mcp-lens serve --host 127.0.0.1 --port 8109
+Restart=always
+RestartSec=3
+KillMode=process
+StandardOutput=journal
+StandardError=journal
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+
+[Install]
+WantedBy=multi-user.target

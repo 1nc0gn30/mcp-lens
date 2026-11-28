@@ -1,0 +1,38 @@
+# MCP Lens (v2.6.0)
+
+> Zero-dependency Python 3.10+ Model Context Protocol (MCP) stdio/SSE traffic sniffer, BPE token-weight schema auditor, JSON Schema minifier, Dual-Theme Web Cockpit (`127.0.0.1:8109`), and real stdio JSON-RPC 2.0 MCP server.
+
+- Canonical Web URL: https://mcp-lens.nullai.tech/
+- Zoth Studio v2 Route: https://zoth.nullai.tech/tools/mcp-lens
+- Source Repository: https://github.com/1nc0gn30/mcp-lens
+- Platform: https://nullai.tech
+- Attribution: Engineered by Neal Frazier Tech (@1nc0gn30) • NullAI Platform
+- License: MIT (100% Free & Open Access, Zero Paywalls)
+- Optional Support: https://buy.stripe.com/3cIfZg27PdKo2D64Ocfw40X | Solana: GG2eQbVh8ut1BK6j1A2tz7pSySdLpD38BgyEhGcxdXoK
+
+## CLI Commands
+- `mcp-lens serve --host 127.0.0.1 --port 8109`
+- `mcp-lens proxy --port 8109 -- <child-mcp-command>`
+- `mcp-lens mcp` (Stdio JSON-RPC 2.0 MCP server exposing 6 tools)
+- `mcp-lens status --port 8109 --json`
+- `mcp-lens desktop`
+- `mcp-lens test`
+- `mcp-lens-tui --status --json`
+
+## Real Stdio MCP Tools (`mcp-lens mcp`)
+1. `mcp_audit_schema_tokens` — Audit raw vs minified BPE token weights for one or more MCP tool schemas.
+2. `mcp_minify_schema` — Losslessly minify an MCP tool schema while preserving parameter types, required keys, and enums.
+3. `mcp_parse_frame` — Parse and categorize a raw JSON-RPC 2.0 frame with byte size and BPE token count.
+4. `mcp_get_traffic` — Query recent captured MCP JSON-RPC frames from `:8109` or in-process store.
+5. `mcp_replay_tool` — Replay/simulate a JSON-RPC 2.0 `tools/call` invocation.
+6. `mcp_diagnostics` — Return version (`2.6.0`), capabilities, and loopback `:8109` health status.
+
+## Local Loopback HTTP API (`http://127.0.0.1:8109`)
+- `GET` / `HEAD` `/health`, `/api/health`
+- `GET` / `HEAD` `/api/stats`
+- `GET` / `HEAD` `/api/traffic?limit=100&topic=tools/call`
+- `GET` / `HEAD` `/api/tools`
+- `GET` `/api/events/stream` (Server-Sent Events)
+- `POST` `/api/minify`
+- `POST` `/api/replay`
+- `POST` `/api/frame`

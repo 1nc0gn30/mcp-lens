@@ -1,60 +1,175 @@
 #!/usr/bin/env python3
-"""⚡ Mcp Lens — Sovereign Unicode U+2800 Braille TUI & Benchmark Harness
-Engineered by 1nc0gn30 (@1nc0gn30) • NullAI Platform
-Paired Uncommon-Web Library: Canvas UI (canvasui-asciify-lens)
+"""MCP Lens — Live Unicode U+2800 Braille TUI & Telemetry Inspector (v2.6.0).
+
+Engineered by Neal Frazier Tech (@1nc0gn30) • NullAI Platform.
+Queries live loopback :8109 (/health, /api/stats, /api/tools) with real local
+MCPTrafficAnalyzer fallback when the daemon is idle.
 """
-import argparse, json, math, os, sys, time
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+import time
+import urllib.request
+from typing import Any, Dict, List, Optional
+
+
+def _resolve_src_dir() -> str:
+    here = os.path.realpath(__file__)
+    script_root = os.path.dirname(os.path.dirname(here))
+    candidates = [
+        os.environ.get("ZOTH_REPO_DIR", "").strip(),
+        script_root,
+        os.path.join(os.path.expanduser("~"), "NullAITech", "mcp-lens"),
+        "/opt/mcp-lens",
+    ]
+    for root in candidates:
+        if root and os.path.isdir(os.path.join(root, "src", "mcp_lens")):
+            return os.path.join(root, "src")
+    return os.path.join(script_root, "src")
+
+
+SRC_DIR = _resolve_src_dir()
+if SRC_DIR not in sys.path:
+    sys.path.insert(0, SRC_DIR)
+
+from mcp_lens import __version__  # noqa: E402
+from mcp_lens.analyzer import MCPTrafficAnalyzer  # noqa: E402
+from mcp_lens.server import SAMPLE_MCP_TOOLS  # noqa: E402
 
 BRAILLE_BASE = 0x2800
-METRICS = ["AST/Engine Latency (ms)", "Throughput (ops/s)", "Memory Footprint (MB)", "Zero-Trust Audit Status"]
-SUMMARY = "Sovereign Mcp Lens engine with deterministic local execution and real-time telemetry."
-UW_SLUG = "canvasui-asciify-lens"
-UW_INSTALL = "npx shadcn@latest add https://canvasui.dev/r/asciify-react.json"
 
-def braille_sparkline(vals):
-    out = []
-    for i in range(0, len(vals) - 1, 2):
-        v1 = max(0, min(3, int(vals[i] * 3.99)))
-        v2 = max(0, min(3, int(vals[i+1] * 3.99)))
-        dots1 = (0x40, 0x04, 0x02, 0x01)[v1]
-        dots2 = (0x80, 0x20, 0x10, 0x08)[v2]
-        out.append(chr(BRAILLE_BASE | dots1 | dots2))
+
+def braille_bars(values: List[float], width: int = 20) -> str:
+    """Render normalized [0.0..1.0] metric values as Unicode U+2800 2x4 Braille bars."""
+    if not values:
+        values = [0.0] * (width * 2)
+    padded = (values * ((width * 2 // len(values)) + 1))[: width * 2]
+    out: List[str] = []
+    for i in range(0, len(padded) - 1, 2):
+        v1 = max(0, min(4, int(round(padded[i] * 4))))
+        v2 = max(0, min(4, int(round(padded[i + 1] * 4))))
+        left_bits = (0x00, 0x40, 0x44, 0x46, 0x47)[v1]
+        right_bits = (0x00, 0x80, 0xA0, 0xB0, 0xB8)[v2]
+        out.append(chr(BRAILLE_BASE | left_bits | right_bits))
     return "".join(out)
 
-def main():
-    ap = argparse.ArgumentParser(description="Mcp Lens Sovereign TUI & Benchmark")
-    ap.add_argument("--json", action="store_true", help="Output JSON telemetry and exit")
-    ap.add_argument("--benchmark", action="store_true", help="Run deterministic latency benchmark")
-    ap.add_argument("--frames", type=int, default=18, help="TUI frames to render")
-    args = ap.parse_args()
 
+def _fetch_json(url: str, timeout: float = 1.0) -> Optional[Dict[str, Any]]:
+    try:
+        with urllib.request.urlopen(url, timeout=timeout) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except Exception:
+        return None
+
+
+def collect_telemetry(host: str, port: int) -> Dict[str, Any]:
     t0 = time.perf_counter()
-    samples = [0.5 + 0.45 * math.sin(i * 0.35) for i in range(48)]
-    elapsed_ms = round((time.perf_counter() - t0) * 1000.0 + 0.42, 3)
+    health = _fetch_json(f"http://{host}:{port}/health")
+    stats = _fetch_json(f"http://{host}:{port}/api/stats") if health else None
+    tools_audit = _fetch_json(f"http://{host}:{port}/api/tools") if health else None
+    online = bool(health and stats)
+
+    if not tools_audit:
+        tools_audit = MCPTrafficAnalyzer.audit_tools_list(SAMPLE_MCP_TOOLS)
+
+    elapsed_ms = round((time.perf_counter() - t0) * 1000.0, 2)
+    tool_entries = tools_audit.get("tools", [])
+    max_tok = max((t.get("total_tokens", 1) for t in tool_entries), default=1)
+    token_profile = [round(t.get("total_tokens", 0) / max_tok, 3) for t in tool_entries]
+    savings_profile = [round(min(1.0, (t.get("savings_percent", 0.0) / 50.0)), 3) for t in tool_entries]
+
+    return {
+        "tool": "mcp-lens",
+        "title": "MCP Lens",
+        "version": __version__,
+        "author": "Neal Frazier Tech (@1nc0gn30) • NullAI Platform",
+        "online": online,
+        "endpoint": f"http://{host}:{port}",
+        "probe_ms": elapsed_ms,
+        "health": health or {"status": "offline", "port": port, "version": __version__},
+        "stats": stats or {
+            "total_frames": 0,
+            "total_bytes": 0,
+            "discovered_tools_count": tools_audit.get("total_tools", 0),
+            "token_overhead": tools_audit.get("total_tokens_raw", 0),
+            "potential_savings_tokens": tools_audit.get("total_tokens_saved", 0),
+            "savings_percent": tools_audit.get("overall_savings_percent", 0.0),
+        },
+        "tools_audit": {
+            "total_tools": tools_audit.get("total_tools", 0),
+            "total_tokens_raw": tools_audit.get("total_tokens_raw", 0),
+            "total_tokens_minified": tools_audit.get("total_tokens_minified", 0),
+            "total_tokens_saved": tools_audit.get("total_tokens_saved", 0),
+            "overall_savings_percent": tools_audit.get("overall_savings_percent", 0.0),
+        },
+        "braille_token_weights": braille_bars(token_profile, width=16),
+        "braille_savings_gain": braille_bars(savings_profile, width=16),
+    }
+
+
+def main(argv: Optional[List[str]] = None) -> int:
+    ap = argparse.ArgumentParser(description=f"MCP Lens v{__version__} Braille TUI & Live Telemetry Inspector")
+    ap.add_argument("--host", default="127.0.0.1", help="MCP Lens daemon host (default: 127.0.0.1)")
+    ap.add_argument("--port", type=int, default=8109, help="MCP Lens daemon port (default: 8109)")
+    ap.add_argument("--status", action="store_true", help="Display concise live daemon status snapshot")
+    ap.add_argument("--json", action="store_true", help="Output structured JSON telemetry and exit")
+    ap.add_argument("--benchmark", action="store_true", help="Run local BPE schema minification benchmark")
+    ap.add_argument("-v", "--version", action="version", version=f"mcp-lens-tui {__version__}")
+    args, _ = ap.parse_known_args(argv)
+
+    data = collect_telemetry(args.host, args.port)
+
+    if args.benchmark:
+        b0 = time.perf_counter()
+        iters = 50
+        for _ in range(iters):
+            MCPTrafficAnalyzer.audit_tools_list(SAMPLE_MCP_TOOLS)
+        b_ms = round((time.perf_counter() - b0) * 1000.0, 2)
+        data["benchmark"] = {
+            "iterations": iters,
+            "total_ms": b_ms,
+            "avg_ms_per_audit": round(b_ms / iters, 3),
+        }
 
     if args.json:
-        print(json.dumps({
-            "tool": "mcp-lens",
-            "title": "Mcp Lens",
-            "architect": "1nc0gn30 (@1nc0gn30) • NullAI Platform",
-            "summary": SUMMARY,
-            "uncommon_web": {"slug": UW_SLUG, "install": UW_INSTALL},
-            "audio_lufs": -14.0,
-            "benchmark_ms": elapsed_ms,
-            "metrics": METRICS,
-            "braille_signature": braille_sparkline(samples),
-        }, indent=2))
-        return
+        print(json.dumps(data, indent=2))
+        return 0
+
+    st = data["stats"]
+    ta = data["tools_audit"]
+    mode_tag = "ONLINE" if data["online"] else "OFFLINE (LOCAL ANALYZER)"
+    mode_col = "\033[1;32m" if data["online"] else "\033[1;33m"
 
     print("\033[1;33m╭──────────────────────────────────────────────────────────────────────────╮\033[0m")
-    print(f"\033[1;33m│\033[0m ⚡ \033[1;37mMcp Lens                        \033[0m │ \033[36m1nc0gn30 • NullAI Platform\033[0m         \033[1;33m│\033[0m")
+    print(
+        f"\033[1;33m│\033[0m \033[1;37mMCP LENS v{__version__}\033[0m  │  "
+        f"{mode_col}{mode_tag:<24}\033[0m │ \033[36mNeal Frazier Tech (@1nc0gn30)\033[0m \033[1;33m│\033[0m"
+    )
     print("\033[1;33m├──────────────────────────────────────────────────────────────────────────┤\033[0m")
-    print(f"\033[1;33m│\033[0m {SUMMARY[:72]:<72} \033[1;33m│\033[0m")
-    print(f"\033[1;33m│\033[0m Uncommon-Web: \033[32m{UW_SLUG:<24}\033[0m Audio: \033[35m-14.0 LUFS Mastered\033[0m   \033[1;33m│\033[0m")
-    for idx, m in enumerate(METRICS[:4]):
-        wave = braille_sparkline([0.5 + 0.45 * math.sin((i + idx * 3) * 0.4) for i in range(40)])
-        print(f"\033[1;33m│\033[0m  • {m[:24]:<24} \033[33m{wave}\033[0m  PASS   \033[1;33m│\033[0m")
+    print(f"\033[1;33m│\033[0m Endpoint: {data['endpoint']:<28} Probe: {data['probe_ms']:>6.2f} ms              \033[1;33m│\033[0m")
+    print(
+        f"\033[1;33m│\033[0m Frames: {st.get('total_frames', 0):<8} Bytes: {st.get('total_bytes', 0):<10} "
+        f"Discovered Tools: {st.get('discovered_tools_count', 0):<14} \033[1;33m│\033[0m"
+    )
+    print(
+        f"\033[1;33m│\033[0m Raw Tokens: {ta['total_tokens_raw']:<6} Minified: {ta['total_tokens_minified']:<6} "
+        f"Saved: {ta['total_tokens_saved']} ({ta['overall_savings_percent']}%)                 \033[1;33m│\033[0m"
+    )
+    print(f"\033[1;33m│\033[0m  • Schema Weight Profile  \033[36m{data['braille_token_weights']}\033[0m   (real BPE weights)   \033[1;33m│\033[0m")
+    print(f"\033[1;33m│\033[0m  • Compression Gain       \033[32m{data['braille_savings_gain']}\033[0m   (lossless AST)       \033[1;33m│\033[0m")
+    if "benchmark" in data:
+        bm = data["benchmark"]
+        print(
+            f"\033[1;33m│\033[0m  • Benchmark ({bm['iterations']} runs)    "
+            f"{bm['total_ms']:.2f} ms total ({bm['avg_ms_per_audit']:.3f} ms/audit)            \033[1;33m│\033[0m"
+        )
     print("\033[1;33m╰──────────────────────────────────────────────────────────────────────────╯\033[0m")
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0",
+  "id": "mcp-lens",
+  "name": "MCP Lens",
+  "version": "2.6.0",
+  "description": "Zero-dependency real-time stdio/SSE traffic sniffer, BPE token weight auditor, JSON Schema minifier, and stdio JSON-RPC 2.0 MCP server.",
+  "author": "Neal Frazier Tech (@1nc0gn30) • NullAI Platform",
+  "homepage": "https://mcp-lens.nullai.tech/",
+  "repository": "https://github.com/1nc0gn30/mcp-lens",
+  "license": "MIT",
+  "transport": "stdio",
+  "command": "mcp-lens",
+  "args": ["mcp"],
+  "localApi": "http://127.0.0.1:8109",
+  "toolCount": 6,
+  "tools": [
+    "mcp_audit_schema_tokens",
+    "mcp_minify_schema",
+    "mcp_parse_frame",
+    "mcp_get_traffic",
+    "mcp_replay_tool",
+    "mcp_diagnostics"
+  ]
+}

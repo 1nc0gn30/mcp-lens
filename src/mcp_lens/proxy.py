@@ -1,8 +1,8 @@
 """Transparent Non-Blocking Stdio/SSE Proxy & Frame Sniffer for MCP.
 
-Engineered by 1nc0gn30 (@1nc0gn30) • NullAI Platform.
+Engineered by Neal Frazier Tech (@1nc0gn30) • NullAI Platform.
 Transparently proxies stdio between host AI agent and child MCP server process,
-tapping JSON-RPC 2.0 frames into memory and dispatching to the live Web Cockpit.
+tapping JSON-RPC 2.0 frames into memory and optionally dispatching to a remote Web Cockpit.
 100% Python Standard Library — Zero External Dependencies.
 """
 
@@ -10,17 +10,16 @@ from __future__ import annotations
 
 import collections
 import json
-import os
 import queue
-import signal
 import subprocess
 import sys
 import threading
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
-from dataclasses import asdict, dataclass, field
-from typing import Any, Callable, Deque, Dict, List, Optional
+from dataclasses import asdict, dataclass
+from typing import Any, Deque, Dict, List, Optional
 
 from .analyzer import MCPTrafficAnalyzer
 
@@ -55,22 +54,20 @@ class TrafficStore:
         """Parse, classify, store, and publish a tapped JSON-RPC frame."""
         parsed = MCPTrafficAnalyzer.parse_frame(raw_line)
         if not parsed:
-            # Ignore non-JSON diagnostic noise or ping
             return None
 
         meta = MCPTrafficAnalyzer.categorize_frame(parsed)
-        f_id = f"f_{int(time.time() * 1000)}_{self.total_frames + 1}"
-
-        frame = TappedFrame(
-            frame_id=f_id,
-            direction=direction,
-            timestamp=time.time(),
-            raw_payload=raw_line.strip(),
-            json_data=parsed,
-            meta=meta,
-        )
 
         with self.lock:
+            f_id = f"f_{int(time.time() * 1000)}_{self.total_frames + 1}"
+            frame = TappedFrame(
+                frame_id=f_id,
+                direction=direction,
+                timestamp=time.time(),
+                raw_payload=raw_line.strip(),
+                json_data=parsed,
+                meta=meta,
+            )
             self.buffer.append(frame)
             self.total_frames += 1
             self.total_bytes += meta["byte_size"]
@@ -131,6 +128,10 @@ class TrafficStore:
 
 GLOBAL_TRAFFIC = TrafficStore()
 
+# Tracks in-process bound HTTP server ports mapped to their TrafficStore
+# so StdioProxy never double-records by POSTing back into the same store.
+IN_PROCESS_COLLECTORS: Dict[int, TrafficStore] = {}
+
 
 class StdioProxy:
     """Bidirectional non-blocking stdio proxy with real-time JSON-RPC line tapping."""
@@ -139,18 +140,73 @@ class StdioProxy:
         self,
         command: List[str],
         traffic_store: Optional[TrafficStore] = None,
-        remote_collector_url: Optional[str] = "http://127.0.0.1:8109/api/frame",
+        remote_collector_url: Optional[str] = None,
         stdin_stream: Optional[Any] = None,
         stdout_stream: Optional[Any] = None,
+        queue_maxsize: int = 256,
     ):
         self.command = command
-        self.traffic = traffic_store or GLOBAL_TRAFFIC
+        self._has_local_store = traffic_store is not None
+        self.traffic = traffic_store if traffic_store is not None else GLOBAL_TRAFFIC
         self.remote_url = remote_collector_url
         self.stdin_stream = stdin_stream if stdin_stream is not None else sys.stdin
         self.stdout_stream = stdout_stream if stdout_stream is not None else sys.stdout
         self.child: Optional[subprocess.Popen] = None
         self.running = False
         self.threads: List[threading.Thread] = []
+        self._post_queue: queue.Queue[Optional[Dict[str, Any]]] = queue.Queue(maxsize=max(1, queue_maxsize))
+        self._dispatcher_thread: Optional[threading.Thread] = None
+        self._dispatcher_lock = threading.Lock()
+
+    def _should_post_remote(self) -> bool:
+        """Never POST back into the same process's TrafficStore (prevents double-recording)."""
+        if not self.remote_url:
+            return False
+        if self._has_local_store:
+            return False
+        try:
+            u = urllib.parse.urlparse(self.remote_url)
+            if u.hostname in ("127.0.0.1", "localhost", "::1") and u.port is not None:
+                bound_store = IN_PROCESS_COLLECTORS.get(u.port)
+                if bound_store is self.traffic:
+                    return False
+        except ValueError:
+            return False
+        return True
+
+    def _ensure_dispatcher(self) -> None:
+        with self._dispatcher_lock:
+            if self._dispatcher_thread is not None and self._dispatcher_thread.is_alive():
+                return
+            self._dispatcher_thread = threading.Thread(
+                target=self._remote_dispatch_loop,
+                name="mcp-lens-remote-dispatcher",
+                daemon=True,
+            )
+            self._dispatcher_thread.start()
+
+    def _remote_dispatch_loop(self) -> None:
+        """Single bounded-queue background worker that posts tapped frames to a remote collector."""
+        while True:
+            item = self._post_queue.get()
+            try:
+                if item is None:
+                    return
+                if not self.remote_url:
+                    continue
+                payload = json.dumps(item).encode("utf-8")
+                req = urllib.request.Request(
+                    self.remote_url,
+                    data=payload,
+                    headers={"Content-Type": "application/json"},
+                    method="POST",
+                )
+                with urllib.request.urlopen(req, timeout=0.25):
+                    pass
+            except Exception:
+                pass  # Non-blocking: never impede stdio flow
+            finally:
+                self._post_queue.task_done()
 
     def start(self) -> int:
         """Spawn child MCP server process and launch tapping threads."""
@@ -162,36 +218,48 @@ class StdioProxy:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                bufsize=1,  # Line buffered
+                bufsize=1,
             )
         except Exception as e:
             sys.stderr.write(f"[mcp-lens] Failed to execute command {' '.join(self.command)}: {e}\n")
             sys.stderr.flush()
+            self.running = False
             return 1
 
-        # Thread 1: Host stdin -> Child stdin (Inbound)
+        if self._should_post_remote():
+            self._ensure_dispatcher()
+
         t_in = threading.Thread(target=self._pump_stdin_to_child, daemon=True)
-        # Thread 2: Child stdout -> Host stdout (Outbound)
         t_out = threading.Thread(target=self._pump_child_stdout_to_host, daemon=True)
-        # Thread 3: Child stderr -> Host stderr (Passthrough)
         t_err = threading.Thread(target=self._pump_child_stderr_to_host, daemon=True)
 
         self.threads = [t_in, t_out, t_err]
         for t in self.threads:
             t.start()
 
-        # Wait for child completion
         try:
             return_code = self.child.wait()
         except KeyboardInterrupt:
             self.stop()
             return 0
 
+        for t in self.threads:
+            t.join(timeout=0.5)
+
         self.running = False
+        self._shutdown_dispatcher()
         return return_code
 
+    def _shutdown_dispatcher(self) -> None:
+        if self._dispatcher_thread is not None and self._dispatcher_thread.is_alive():
+            try:
+                self._post_queue.put_nowait(None)
+            except queue.Full:
+                pass
+            self._dispatcher_thread.join(timeout=0.5)
+
     def stop(self) -> None:
-        """Terminate child process cleanly."""
+        """Terminate child process and dispatcher cleanly."""
         self.running = False
         if self.child and self.child.poll() is None:
             try:
@@ -199,6 +267,7 @@ class StdioProxy:
                 self.child.wait(timeout=2.0)
             except Exception:
                 self.child.kill()
+        self._shutdown_dispatcher()
 
     def _pump_stdin_to_child(self) -> None:
         """Stream host stdin directly to child stdin and record inbound frames."""
@@ -207,10 +276,8 @@ class StdioProxy:
                 if not self.running or self.child is None or self.child.stdin is None:
                     break
 
-                # Tap frame
                 self._dispatch_tapped_frame("inbound", line)
 
-                # Forward without delay
                 try:
                     self.child.stdin.write(line)
                     self.child.stdin.flush()
@@ -218,6 +285,12 @@ class StdioProxy:
                     break
         except Exception:
             pass
+        finally:
+            try:
+                if self.child and self.child.stdin:
+                    self.child.stdin.close()
+            except Exception:
+                pass
 
     def _pump_child_stdout_to_host(self) -> None:
         """Stream child stdout directly to host stdout and record outbound frames."""
@@ -229,10 +302,8 @@ class StdioProxy:
                 if not self.running:
                     break
 
-                # Tap frame
                 self._dispatch_tapped_frame("outbound", line)
 
-                # Forward without delay
                 try:
                     self.stdout_stream.write(line)
                     self.stdout_stream.flush()
@@ -259,21 +330,11 @@ class StdioProxy:
             pass
 
     def _dispatch_tapped_frame(self, direction: str, raw_line: str) -> None:
-        """Record into in-memory store and notify collector."""
+        """Record into in-memory store and enqueue for remote collector only when external."""
         frame = self.traffic.record_frame(direction, raw_line)
-        if frame and self.remote_url:
-            # Asynchronous background post to server on port 8109 if running
-            def _post():
-                try:
-                    payload = json.dumps(frame.to_dict()).encode("utf-8")
-                    req = urllib.request.Request(
-                        self.remote_url,
-                        data=payload,
-                        headers={"Content-Type": "application/json"},
-                        method="POST",
-                    )
-                    with urllib.request.urlopen(req, timeout=0.2):
-                        pass
-                except Exception:
-                    pass  # Non-blocking, never impede stdio flow
-            threading.Thread(target=_post, daemon=True).start()
+        if frame and self._should_post_remote():
+            self._ensure_dispatcher()
+            try:
+                self._post_queue.put_nowait(frame.to_dict())
+            except queue.Full:
+                pass  # Bounded queue drops telemetry rather than blocking stdio
